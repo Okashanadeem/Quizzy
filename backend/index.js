@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 require('dotenv').config();
 
 const adminRoutes = require('./routes/adminRoutes');
@@ -34,7 +35,7 @@ mongoose.connect(process.env.MONGODB_URI)
     } else if (err.message.includes('ETIMEDOUT')) {
       console.error('👉 TIP: Check your Network Access in MongoDB Atlas. Is your IP whitelisted (0.0.0.0/0)?');
     }
-    process.exit(1);
+    // Note: Do not use process.exit(1) on Vercel as it will kill the serverless function
   });
 
 const validate = require('./middleware/validate');
@@ -63,7 +64,8 @@ app.get('/health', (req, res) => {
 app.post('/api/student/login', validate(studentLoginSchema), (req, res) => {
   const { name, studentId } = req.body;
   try {
-    const studentsData = JSON.parse(fs.readFileSync('./data/students.json', 'utf8'));
+    const studentsFilePath = path.join(__dirname, 'data', 'students.json');
+    const studentsData = JSON.parse(fs.readFileSync(studentsFilePath, 'utf8'));
     const student = studentsData.find(
       (s) => s.name.toLowerCase() === name.toLowerCase() && s.id === studentId
     );
@@ -74,6 +76,7 @@ app.post('/api/student/login', validate(studentLoginSchema), (req, res) => {
       res.status(401).json({ message: 'Invalid credentials' });
     }
   } catch (error) {
+    console.error('Login Error:', error);
     res.status(500).json({ message: 'Error processing login' });
   }
 });
@@ -210,7 +213,7 @@ app.post('/api/quizzes/:id/submit', validate(submissionSchema), async (req, res)
     let emailSent = false;
     const mailOptions = {
       from: process.env.GMAIL_USER,
-      to: process.env.INSTRUCTOR_EMAIL || process.env.GMAIL_USER, // Instructor receives the email
+      to: process.env.GMAIL_USER, // Notifications go to the main Gmail account
       subject: `[QUIZ SUBMISSION] ${quiz.title} - ${studentName} (${studentID})`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -307,3 +310,5 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`CORS Origin Allowed: ${process.env.CLIENT_URL || 'http://localhost:3000'}`);
 });
+
+module.exports = app;
