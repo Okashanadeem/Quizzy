@@ -11,7 +11,7 @@ const Submission = require('../models/Submission');
 const multer = require('multer');
 const csv = require('csv-parser');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
 const validate = require('../middleware/validate');
 const { adminLoginSchema, quizSchema, questionSchema, gradingSchema } = require('../validation/schemas');
@@ -139,7 +139,7 @@ router.post('/quizzes/:id/questions', authAdmin, validate(questionSchema), async
     if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
 
     quiz.questions.push({
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       type,
       question,
       options,
@@ -172,7 +172,7 @@ router.post('/quizzes/:id/questions/csv', authAdmin, upload.single('file'), asyn
         if (data.option4) options.push(data.option4);
 
         results.push({
-          id: uuidv4(),
+          id: crypto.randomUUID(),
           type: 'mcq', 
           question: data.question,
           options,
