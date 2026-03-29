@@ -18,4 +18,4 @@ const quizSchema = new mongoose.Schema({
   questions: [questionSchema]
 }, { timestamps: true });
 
-module.exports = mongoose.model('Quiz', quizSchema);
+module.exports = mongoose.models.Quiz || mongoose.model('Quiz', quizSchema);

@@ -1,10 +1,13 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
+const path = require('path');
+const os = require('os');
 require('dotenv').config();
 
 const authAdmin = require('../middleware/auth');
 const Quiz = require('../models/Quiz');
+const Submission = require('../models/Submission');
 const multer = require('multer');
 const csv = require('csv-parser');
 const fs = require('fs');
@@ -13,7 +16,8 @@ const { v4: uuidv4 } = require('uuid');
 const validate = require('../middleware/validate');
 const { adminLoginSchema, quizSchema, questionSchema, gradingSchema } = require('../validation/schemas');
 
-const upload = multer({ dest: 'uploads/' });
+// Vercel serverless functions only have write access to /tmp
+const upload = multer({ dest: path.join(os.tmpdir(), 'uploads') });
 
 // Admin Login Route
 router.post('/login', validate(adminLoginSchema), (req, res) => {
