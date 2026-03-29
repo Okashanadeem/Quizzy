@@ -213,7 +213,7 @@ export default function AdminDashboard() {
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={fetchAll}
+                onClick={() => fetchAll()}
                 disabled={loading}
                 className="p-3.5 bg-white border border-slate-200 text-slate-500 rounded-2xl hover:bg-slate-50 transition-all shadow-sm active:scale-95 disabled:opacity-50"
                 title="Refresh Data"

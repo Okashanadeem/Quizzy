@@ -187,10 +187,9 @@ export default function SubmissionsPage({ params }: { params: Promise<{ id: stri
               onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
-          <button 
-            onClick={fetchSubmissions}
-            className="p-3 text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
-            title="Refresh List"
+          <button
+            onClick={() => fetchSubmissions()}
+            className="p-3 text-slate-500 hover:bg-slate-100 rounded-xl transition-all"            title="Refresh List"
           >
             <RefreshCw className="w-5 h-5" />
           </button>

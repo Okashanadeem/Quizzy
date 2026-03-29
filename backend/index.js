@@ -42,9 +42,21 @@ const { studentLoginSchema, submissionSchema } = require('./validation/schemas')
 
 // ... (Middleware and DB connection)
 
-// Routes
+// Health Check Routes
 app.get('/', (req, res) => {
-  res.send('Online Quiz Web App API is running...');
+  res.status(200).json({
+    status: 'UP',
+    message: 'Online Quiz Web App API is running...',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'UP',
+    database: mongoose.connection.readyState === 1 ? 'CONNECTED' : 'DISCONNECTED',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Student Login Route (Centralized in backend)
