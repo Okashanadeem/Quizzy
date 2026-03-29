@@ -28,27 +28,39 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Request Logging Middleware
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - Origin: ${req.headers.origin}`);
+// Database connection state
+let isConnected = false;
+
+const connectDB = async () => {
+  if (isConnected) return;
+  
+  if (!process.env.MONGODB_URI) {
+    console.error('❌ MONGODB_URI is not defined.');
+    return;
+  }
+
+  try {
+    const db = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+    });
+    isConnected = db.connections[0].readyState === 1;
+    console.log('✅ Connected to MongoDB Atlas');
+  } catch (err) {
+    console.error('❌ MongoDB Connection Error:', err.message);
+  }
+};
+
+// Middleware to ensure DB connection
+app.use(async (req, res, next) => {
+  await connectDB();
   next();
 });
 
-// Database Connection
-if (!process.env.MONGODB_URI) {
-  console.error('❌ CRITICAL ERROR: MONGODB_URI is not defined in environment variables.');
-} else {
-  mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('✅ Connected to MongoDB Atlas successfully!'))
-    .catch((err) => {
-      console.error('❌ MongoDB Connection Error:', err.message);
-      if (err.message.includes('authentication failed')) {
-        console.error('👉 TIP: Check your username and password in Vercel Environment Variables.');
-      } else if (err.message.includes('ETIMEDOUT')) {
-        console.error('👉 TIP: Check your Network Access in MongoDB Atlas. Is your IP whitelisted (0.0.0.0/0)?');
-      }
-    });
-}
+// Request Logging Middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
 
 // Nodemailer Setup
 const transporter = nodemailer.createTransport({
@@ -66,8 +78,7 @@ app.get('/', (req, res) => {
   res.status(200).json({
     status: 'UP',
     message: 'Online Quiz Web App API is running...',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -293,11 +304,8 @@ app.use((err, req, res, next) => {
   res.status(500).send({ message: 'Internal Server Error', error: err.message });
 });
 
-// For local development
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+  app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 }
 
 module.exports = app;
