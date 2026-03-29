@@ -30,7 +30,7 @@
 ### Step 1 — Clone the Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Okashanadeem/Quizzy
 cd Quizzy
 ```
 
@@ -88,12 +88,12 @@ Quizzy emails result sheets automatically. You must use a **Gmail App Password**
 
 Students log in using credentials stored in a JSON file. Only students listed here can access the exam portal.
 
-**File:** `frontendApp/src/data/students.json`
+**File:** `backend/src/data/students.json`
 
 ```json
 [
-  { "id": "BSE-25F-001", "name": "John Doe" },
-  { "id": "BSE-25F-002", "name": "Jane Smith" }
+  { "id": "BSE-25F-001", "name": "Okasha Nadeem" },
+  { "id": "BSE-25F-002", "name": "Muhammad Tabish" }
 ]
 ```
 
