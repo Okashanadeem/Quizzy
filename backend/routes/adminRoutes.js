@@ -195,8 +195,6 @@ router.post('/quizzes/:id/questions/csv', authAdmin, upload.single('file'), asyn
   }
 });
 
-const Submission = require('../models/Submission');
-
 // Get All Submissions for a Quiz (with Pagination)
 router.get('/quizzes/:id/submissions', authAdmin, async (req, res) => {
   try {
