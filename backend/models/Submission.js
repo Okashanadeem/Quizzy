@@ -13,7 +13,8 @@ const submissionSchema = new mongoose.Schema({
   score: { type: Number, default: 0 },
   maxScore: { type: Number, default: 0 },
   tabSwitches: { type: Number, default: 0 },
-  recordingURL: { type: String },
+  emailSent: { type: Boolean, default: false },
+  isUnverified: { type: Boolean, default: false },
   submittedAt: { type: Date, default: Date.now }
 });
 

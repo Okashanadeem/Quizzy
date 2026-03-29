@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quizzy — README</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f12;
+    --surface: #13161b;
+    --card: #181c23;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --muted: #7a8090;
+    --accent: #4f8ef7;
+    --accent-glow: rgba(79,142,247,0.15);
+    --green: #3ecf8e;
+    --green-bg: rgba(62,207,142,0.08);
+    --amber: #f5a623;
+    --amber-bg: rgba(245,166,35,0.08);
+    --red: #ef5350;
+    --red-bg: rgba(239,83,80,0.08);
+    --purple: #a78bfa;
+    --purple-bg: rgba(167,139,250,0.08);
+    --mono: 'DM Mono', monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Sora', sans-serif;
+    --radius: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* Grid noise texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 72px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--purple-bg);
+    border: 1px solid rgba(167,139,250,0.2);
+    color: var(--purple);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 24px;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--purple);
+    display: block;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(42px, 6vw, 68px);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-desc {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.65;
+    margin-bottom: 32px;
+  }
+
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 36px;
+  }
+
+  .pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--muted);
+  }
+
+  .pill.green { border-color: rgba(62,207,142,0.2); color: var(--green); background: var(--green-bg); }
+  .pill.blue { border-color: rgba(79,142,247,0.2); color: var(--accent); background: var(--accent-glow); }
+  .pill.amber { border-color: rgba(245,166,35,0.2); color: var(--amber); background: var(--amber-bg); }
+
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #6ba3ff; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border-bright);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+
+  /* ── Feature cards ── */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 64px;
+  }
+
+  .feat {
+    background: var(--card);
+    padding: 28px 24px;
+    transition: background 0.15s;
+  }
+  .feat:hover { background: var(--surface); }
+
+  .feat-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    margin-bottom: 14px;
+  }
+
+  .feat h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .feat p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* ── Section headings ── */
+  .section { margin-bottom: 56px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .section-num {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(79,142,247,0.25);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-family: var(--mono);
+  }
+
+  h2 {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  h3.sub {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    margin-top: 24px;
+  }
+
+  p { color: var(--muted); margin-bottom: 14px; }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: #0a0c10;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 16px 0;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .code-lang::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: block;
+    opacity: 0.6;
+  }
+
+  pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.75;
+    color: #cdd6f4;
+  }
+
+  .c-cmd { color: #89dceb; }
+  .c-key { color: var(--purple); }
+  .c-val { color: var(--green); }
+  .c-cmt { color: #6c7086; font-style: italic; }
+  .c-str { color: var(--amber); }
+
+  /* ── Step list ── */
+  .steps { display: flex; flex-direction: column; gap: 4px; }
+
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 16px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.15s;
+  }
+  .step:hover { border-color: var(--border-bright); }
+
+  .step-n {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(79,142,247,0.25);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-body h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .step-body p { font-size: 13px; color: var(--muted); margin: 0; }
+
+  .step-body a { font-size: 13px; }
+
+  /* ── Info cards ── */
+  .info-card {
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin: 16px 0;
+    border: 1px solid;
+  }
+
+  .info-card.warn {
+    background: var(--amber-bg);
+    border-color: rgba(245,166,35,0.2);
+    color: var(--amber);
+  }
+  .info-card.info {
+    background: var(--accent-glow);
+    border-color: rgba(79,142,247,0.2);
+    color: var(--accent);
+  }
+  .info-card.tip {
+    background: var(--green-bg);
+    border-color: rgba(62,207,142,0.2);
+    color: var(--green);
+  }
+
+  .info-card strong { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px; }
+  .info-card p { color: inherit; font-size: 13px; margin: 0; opacity: 0.85; }
+
+  /* ── JSON block ── */
+  .json-demo {
+    background: #0a0c10;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.75;
+    margin: 16px 0;
+  }
+
+  /* ── Deploy steps ── */
+  .deploy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 600px) {
+    .deploy-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 38px; }
+  }
+
+  .deploy-step {
+    background: var(--card);
+    padding: 24px 20px;
+  }
+
+  .deploy-step .ds-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+    opacity: 0.7;
+  }
+
+  .deploy-step h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .deploy-step p {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .deploy-step .ds-cmd {
+    margin-top: 12px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--green);
+  }
+
+  /* ── Credit ── */
+  .credit {
+    border-top: 1px solid var(--border);
+    padding-top: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .credit-left h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .credit-left p {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .cams-badge {
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    font-family: var(--mono);
+  }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  ul.list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  ul.list li {
+    display: flex;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    align-items: flex-start;
+    padding: 10px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  ul.list li::before {
+    content: '→';
+    color: var(--accent);
+    flex-shrink: 0;
+    font-size: 12px;
+    margin-top: 1px;
+  }
+
+  ul.list li span { color: var(--text); font-weight: 500; margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ── HERO ── -->
+  <div class="hero">
+    <div class="badge">A Product of CAMS</div>
+    <h1>Quiz<em>zy</em></h1>
+    <p class="hero-desc">
+      A secure, automated assessment platform for educators — built with Next.js and Node.js.
+      From bulk MCQ imports to instant grading and emailed results, all in one place.
+    </p>
+    <div class="pill-row">
+      <span class="pill blue">Next.js</span>
+      <span class="pill blue">Node.js</span>
+      <span class="pill green">MongoDB Atlas</span>
+      <span class="pill green">Vercel</span>
+      <span class="pill amber">Gmail API</span>
+      <span class="pill amber">JWT Auth</span>
+    </div>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/Okashanadeem" target="_blank">
+        ↗ View on GitHub
+      </a>
+      <a class="btn btn-ghost" href="https://vercel.com" target="_blank">
+        ⬆ Deploy to Vercel
+      </a>
+    </div>
+  </div>
+
+
+  <!-- ── FEATURE OVERVIEW ── -->
+  <div class="features" style="margin-bottom: 64px;">
+    <div class="feat">
+      <div class="feat-icon" style="background:var(--accent-glow); border:1px solid rgba(79,142,247,0.2);">🔒</div>
+      <h3>Secure Exams</h3>
+      <p>Tab-switch detection keeps students honest. Any attempt to leave the exam window is flagged automatically.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:var(--green-bg); border:1px solid rgba(62,207,142,0.2);">📅</div>
+      <h3>Flexible Scheduling</h3>
+      <p>Define exact visibility windows and per-student attempt durations with precision.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:var(--amber-bg); border:1px solid rgba(245,166,35,0.2);">⚡</div>
+      <h3>Auto Grading</h3>
+      <p>MCQs are marked instantly. Short answers get a dedicated instructor review portal.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:var(--purple-bg); border:1px solid rgba(167,139,250,0.2);">📧</div>
+      <h3>Email Reports</h3>
+      <p>Detailed HTML answer sheets are dispatched to the instructor's Gmail the moment a student submits.</p>
+    </div>
+  </div>
+
+
+  <!-- ── SECTION 1: CLONE ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <h2>Clone the Repository</h2>
+    </div>
+    <p>Start by cloning the project and navigating into it. You'll configure environment variables in the next step.</p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+      </div>
+      <pre><span class="c-cmd">git clone</span> https://github.com/Okashanadeem/Quizzy
+<span class="c-cmd">cd</span> Quizzy</pre>
+    </div>
+  </div>
+
+
+  <!-- ── SECTION 2: ENV CONFIG ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <h2>Configure Your Environment</h2>
+    </div>
+    <p>Create a <code style="font-family:var(--mono);color:var(--purple);font-size:13px;">.env</code> file inside the <code style="font-family:var(--mono);color:var(--purple);font-size:13px;">backend/</code> directory and fill in all required values.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">backend/.env</span>
+      </div>
+      <pre><span class="c-key">PORT</span>=<span class="c-val">5000</span>
+<span class="c-key">MONGODB_URI</span>=<span class="c-str">mongodb+srv://&lt;username&gt;:&lt;password&gt;@cluster.mongodb.net/Quizzy?retryWrites=true&w=majority</span>
+<span class="c-key">JWT_SECRET</span>=<span class="c-str">your_jwt_secret_key</span>
+<span class="c-key">GMAIL_USER</span>=<span class="c-str">your_email@gmail.com</span>
+<span class="c-key">GMAIL_APP_PASSWORD</span>=<span class="c-str">your_16_digit_app_password</span>
+<span class="c-key">ADMIN_USERNAME</span>=<span class="c-str">admin</span>
+<span class="c-key">ADMIN_PASSWORD</span>=<span class="c-str">admin123</span>
+<span class="c-key">CLIENT_URL</span>=<span class="c-str">http://localhost:3000</span>  <span class="c-cmt"># update to Vercel URL after deployment</span></pre>
+    </div>
+
+    <div class="info-card warn">
+      <strong>⚠ Before deploying</strong>
+      <p>Update <code>CLIENT_URL</code> and <code>MONGODB_URI</code> with your live Vercel and Atlas URLs. Do not push your <code>.env</code> file to GitHub.</p>
+    </div>
+
+    <h3 class="sub">🍃 Getting your MongoDB Atlas URI</h3>
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><div class="step-body"><h4>Create a free cluster</h4><p>Log in to <a href="https://www.mongodb.com/cloud/atlas" target="_blank">MongoDB Atlas</a> and create a free Shared Cluster.</p></div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-body"><h4>Add a database user</h4><p>Go to <strong>Database Access</strong> → create a user with <strong>Read/Write</strong> permissions. Avoid special characters (<code>@ # $</code>) in the password, or <a href="https://www.urlencoder.org/" target="_blank">URL-encode them</a>.</p></div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-body"><h4>Allow network access</h4><p>Go to <strong>Network Access</strong> → <strong>Add IP Address</strong> → choose <strong>Allow Access from Anywhere</strong> <code>(0.0.0.0/0)</code>.</p></div></div>
+      <div class="step"><div class="step-n">4</div><div class="step-body"><h4>Copy the connection string</h4><p>Go to <strong>Deployment → Database → Connect → Drivers</strong>. Copy the URI and add <code>/Quizzy</code> before the <code>?</code> to name your database.</p></div></div>
+    </div>
+  </div>
+
+
+  <!-- ── SECTION 3: GMAIL ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <h2>Set Up Gmail App Password</h2>
+    </div>
+    <p>Quizzy emails result sheets to the instructor automatically. You must use a <strong style="color:var(--text);">Gmail App Password</strong> — not your regular account password.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><div class="step-body"><h4>Enable 2-Step Verification</h4><p>Visit <a href="https://myaccount.google.com/security" target="_blank">Google Account Security</a> and turn on 2-Step Verification.</p></div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-body"><h4>Find App Passwords</h4><p>Search for <strong>App Passwords</strong> in your Google Account's search bar and open the setting.</p></div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-body"><h4>Create a new app password</h4><p>Select <strong>Other</strong>, name it <code>Quizzy</code>, and click <strong>Generate</strong>.</p></div></div>
+      <div class="step"><div class="step-n">4</div><div class="step-body"><h4>Paste into .env</h4><p>Copy the 16-digit code and set it as your <code>GMAIL_APP_PASSWORD</code> in <code>backend/.env</code>.</p></div></div>
+    </div>
+
+    <div class="info-card tip">
+      <strong>✓ Tip</strong>
+      <p>The App Password is only shown once. Copy it immediately. If you lose it, you'll need to generate a new one.</p>
+    </div>
+  </div>
+
+
+  <!-- ── SECTION 4: STUDENTS ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <h2>Manage the Student List</h2>
+    </div>
+    <p>Students log in using credentials stored in a JSON file. Only students listed here can access the exam portal.</p>
+    <p>Edit this file: <code style="font-family:var(--mono);color:var(--purple);font-size:13px;">backend/src/data/students.json</code></p>
+
+    <div class="json-demo">
+      <span style="color:#6c7086;">[</span><br>
+      &nbsp;&nbsp;<span style="color:#6c7086;">{</span>
+      &nbsp;<span style="color:var(--purple);">"id"</span>: <span style="color:var(--amber);">"BSE-25F-001"</span>,
+      &nbsp;<span style="color:var(--purple);">"name"</span>: <span style="color:var(--amber);">"Okasha Nadeem"</span>
+      &nbsp;<span style="color:#6c7086;">},</span><br>
+      &nbsp;&nbsp;<span style="color:#6c7086;">{</span>
+      &nbsp;<span style="color:var(--purple);">"id"</span>: <span style="color:var(--amber);">"BSE-25F-002"</span>,
+      &nbsp;<span style="color:var(--purple);">"name"</span>: <span style="color:var(--amber);">"Muhammad Tabish"</span>
+      &nbsp;<span style="color:#6c7086;">}</span><br>
+      <span style="color:#6c7086;">]</span>
+    </div>
+
+    <div class="info-card warn">
+      <strong>⚠ Important</strong>
+      <p>After editing this file, you must commit and push the changes to GitHub so the deployed frontend picks up the new students.</p>
+    </div>
+  </div>
+
+
+  <!-- ── SECTION 5: DEPLOY ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <h2>Deploy to Vercel</h2>
+    </div>
+    <p>Quizzy's backend and frontend are deployed as two separate Vercel projects. Follow the order below.</p>
+
+    <div class="deploy-grid">
+      <div class="deploy-step">
+        <div class="ds-num">STEP 1</div>
+        <h4>Push to GitHub</h4>
+        <p>Upload your configured project to a GitHub repository (public or private).</p>
+        <div class="ds-cmd">git push origin main</div>
+      </div>
+      <div class="deploy-step">
+        <div class="ds-num">STEP 2</div>
+        <h4>Deploy Backend</h4>
+        <p>On <a href="https://vercel.com" target="_blank">Vercel</a>, import the <code>backend/</code> folder. Add all <code>.env</code> variables in the Environment Variables section. Copy the deployment URL.</p>
+      </div>
+      <div class="deploy-step">
+        <div class="ds-num">STEP 3</div>
+        <h4>Deploy Frontend</h4>
+        <p>Import the <code>frontendApp/</code> folder. Add one environment variable: <code>NEXT_PUBLIC_API_URL</code> = your backend URL from Step 2.</p>
+      </div>
+    </div>
+
+    <div class="info-card info">
+      <strong>ℹ After deploying</strong>
+      <p>Go back to your <code>backend/.env</code> and update <code>CLIENT_URL</code> with your live frontend URL. Redeploy the backend for CORS to work correctly.</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">Frontend environment variable</span>
+      </div>
+      <pre><span class="c-key">NEXT_PUBLIC_API_URL</span>=<span class="c-str">https://quizzy-api.vercel.app</span></pre>
+    </div>
+  </div>
+
+
+  <!-- ── QUICK REFERENCE ── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <h2>Quick Reference</h2>
+    </div>
+    <ul class="list">
+      <li><span>MongoDB Atlas</span> — <a href="https://www.mongodb.com/cloud/atlas" target="_blank">mongodb.com/cloud/atlas</a></li>
+      <li><span>Google Account Security</span> — <a href="https://myaccount.google.com/security" target="_blank">myaccount.google.com/security</a></li>
+      <li><span>URL Encoder (for passwords)</span> — <a href="https://www.urlencoder.org/" target="_blank">urlencoder.org</a></li>
+      <li><span>Vercel Dashboard</span> — <a href="https://vercel.com/dashboard" target="_blank">vercel.com/dashboard</a></li>
+      <li><span>Developer GitHub</span> — <a href="https://github.com/Okashanadeem" target="_blank">github.com/Okashanadeem</a></li>
+    </ul>
+  </div>
+
+
+  <!-- ── CREDIT ── -->
+  <div class="credit">
+    <div class="credit-left">
+      <h4>Quizzy</h4>
+      <p>
+        Built by <a href="https://github.com/Okashanadeem" target="_blank">Okasha Nadeem</a> — CR of BSSE Fall 2025 · SMIU
+      </p>
+      <p style="margin-top:4px;">
+    <span class="cams-badge" title="Class Attendance Management System">A PRODUCT OF CAMS</span>
+</p>
+    </div>
+    <div>
+      <a class="btn btn-ghost" href="https://github.com/Okashanadeem" target="_blank" style="font-size:13px;">
+        View Developer Profile ↗
+      </a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

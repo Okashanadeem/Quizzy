@@ -12,7 +12,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@supabase/supabase-js": "^2.100.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "csv-parser": "^3.2.0",
@@ -22,7 +21,8 @@
     "mongoose": "^9.3.2",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.4",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

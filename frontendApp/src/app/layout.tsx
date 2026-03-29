@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Online Quiz Web App",
@@ -16,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
+        <Toaster position="top-center" reverseOrder={false} />
         <Navbar />
         <main className="flex-grow flex flex-col">{children}</main>
         <Footer />

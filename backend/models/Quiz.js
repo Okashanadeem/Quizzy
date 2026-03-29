@@ -13,7 +13,8 @@ const quizSchema = new mongoose.Schema({
   title: { type: String, required: true },
   startTime: { type: Date, required: true },
   endTime: { type: Date, required: true },
-  isRecordingEnabled: { type: Boolean, default: false },
+  duration: { type: Number, required: true }, // in minutes
+  unverifiedPassword: { type: String }, // Optional shared password for guest students
   questions: [questionSchema]
 }, { timestamps: true });
 
