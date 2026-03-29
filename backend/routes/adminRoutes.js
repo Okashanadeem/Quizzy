@@ -32,8 +32,8 @@ router.post('/login', validate(adminLoginSchema), (req, res) => {
 
     res.cookie('adminToken', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true, // Always true for Vercel/Production
+      sameSite: 'none', // Required for cross-site cookie transfer
       maxAge: 3600000 // 1 hour
     });
 
