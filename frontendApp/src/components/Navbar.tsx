@@ -39,7 +39,7 @@ export default function Navbar() {
   const handleSignOut = async () => {
     if (isAdminLoggedIn) {
       try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/logout`, { 
+        await fetch(`/api/admin/logout`, { 
           method: 'POST',
           credentials: 'include' 
         });

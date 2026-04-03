@@ -49,14 +49,14 @@ export default function StudentDashboard() {
 
   const fetchQuizzes = async (studentId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/quizzes`);
+      const response = await fetch(`/api/quizzes`);
       const data = await response.json();
       setQuizzes(data);
       
       // Check submission status for each quiz
       const statuses: Record<string, boolean> = {};
       await Promise.all(data.map(async (quiz: any) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/submissions/check/${quiz._id}/${studentId}`);
+        const res = await fetch(`/api/submissions/check/${quiz._id}/${studentId}`);
         const statusData = await res.json();
         statuses[quiz._id] = statusData.submitted;
       }));

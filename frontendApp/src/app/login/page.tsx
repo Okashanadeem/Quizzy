@@ -16,7 +16,7 @@ export default function StudentLogin() {
 
     try {
       // Authenticate via backend
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student/login`, {
+      const response = await fetch(`/api/student/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, studentId })
@@ -27,7 +27,7 @@ export default function StudentLogin() {
         
         try {
           // Force clear any active admin session on the backend
-          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/logout`, { 
+          await fetch(`/api/admin/logout`, { 
             method: 'POST', 
             credentials: 'include' 
           });

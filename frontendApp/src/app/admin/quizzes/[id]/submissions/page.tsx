@@ -47,7 +47,7 @@ export default function SubmissionsPage({ params }: { params: Promise<{ id: stri
   const fetchSubmissions = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/quizzes/${quizId}/submissions?page=${page}&limit=10`, {
+      const response = await fetch(`/api/admin/quizzes/${quizId}/submissions?page=${page}&limit=10`, {
         credentials: 'include'
       });
       if (response.status === 401 || response.status === 403) {
@@ -70,7 +70,7 @@ export default function SubmissionsPage({ params }: { params: Promise<{ id: stri
 
   const fetchQuizInfo = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/quizzes`, {
+      const response = await fetch(`/api/admin/quizzes`, {
         credentials: 'include'
       });
       const data = await response.json();
@@ -109,7 +109,7 @@ export default function SubmissionsPage({ params }: { params: Promise<{ id: stri
 
     setGrading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/submissions/${submissionId}/grade`, {
+      const response = await fetch(`/api/admin/submissions/${submissionId}/grade`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ questionId, marksAwarded: marks }),

@@ -74,7 +74,7 @@ export default function AdminDashboard() {
 
   const fetchQuizzes = async (page = 1) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/quizzes?page=${page}&limit=9`, {
+      const res = await fetch(`/api/admin/quizzes?page=${page}&limit=9`, {
         headers: { 'Cache-Control': 'no-cache' },
         credentials: 'include',
       });
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/stats`, {
+      const res = await fetch(`/api/admin/stats`, {
         credentials: 'include',
       });
       if (res.ok) {
@@ -129,8 +129,8 @@ export default function AdminDashboard() {
 
     try {
       const url = editingQuiz 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/admin/quizzes/${editingQuiz._id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/admin/quizzes`;
+        ? `/api/admin/quizzes/${editingQuiz._id}`
+        : `/api/admin/quizzes`;
       
       const res = await fetch(url, {
         method: editingQuiz ? 'PATCH' : 'POST',

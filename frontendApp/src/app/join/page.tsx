@@ -24,7 +24,7 @@ export default function JoinQuiz() {
 
   const fetchQuizzes = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/quizzes`);
+      const response = await fetch(`/api/quizzes`);
       const data = await response.json();
       
       // Filter for LIVE quizzes only

@@ -150,7 +150,7 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
 
   const fetchQuiz = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/quizzes/${quizId}`);
+      const response = await fetch(`/api/quizzes/${quizId}`);
       if (response.status === 403) {
         setError('Quiz is not accessible at this time.');
         return;
@@ -166,7 +166,7 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
 
   const checkSubmissionStatus = async (studentId: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/submissions/check/${quizId}/${studentId}`);
+      const response = await fetch(`/api/submissions/check/${quizId}/${studentId}`);
       const data = await response.json();
       if (data.submitted) {
         setHasAlreadySubmitted(true);
@@ -186,7 +186,7 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
     
     // First check if this guest ID has already submitted
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/submissions/check/${quizId}/${unverifiedId}`);
+      const response = await fetch(`/api/submissions/check/${quizId}/${unverifiedId}`);
       const data = await response.json();
       if (data.submitted) {
         setHasAlreadySubmitted(true);
@@ -260,7 +260,7 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
       };
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/quizzes/${quizId}/submit`,
+        `/api/quizzes/${quizId}/submit`,
         { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' },

@@ -44,7 +44,7 @@ export default function ManageQuestions({ params }: { params: Promise<{ id: stri
 
   const fetchQuiz = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/quizzes`, {
+      const response = await fetch(`/api/admin/quizzes`, {
         headers: { 'Cache-Control': 'no-cache' },
         credentials: 'include'
       });
@@ -65,7 +65,7 @@ export default function ManageQuestions({ params }: { params: Promise<{ id: stri
     const options = type === 'mcq' ? [option1, option2, option3, option4] : [];
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/quizzes/${quizId}/questions`, {
+      const response = await fetch(`/api/admin/quizzes/${quizId}/questions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, question: questionText, options, answer, marks }),
@@ -93,7 +93,7 @@ export default function ManageQuestions({ params }: { params: Promise<{ id: stri
 
     const loadingToast = toast.loading('Importing questions...');
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/quizzes/${quizId}/questions/csv`, {
+      const response = await fetch(`/api/admin/quizzes/${quizId}/questions/csv`, {
         method: 'POST',
         body: formData,
         credentials: 'include'
