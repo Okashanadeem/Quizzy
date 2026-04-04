@@ -18,7 +18,8 @@ const quizSchema = z.object({
   startTime: z.string().datetime("Invalid start time format"),
   endTime: z.string().datetime("Invalid end time format"),
   duration: z.number().int().positive("Duration must be a positive integer"),
-  unverifiedPassword: z.string().optional()
+  unverifiedPassword: z.string().optional(),
+  allowStudentCopy: z.boolean().optional().default(false)
 }).refine((data) => new Date(data.startTime) < new Date(data.endTime), {
   message: "End time must be after start time",
   path: ["endTime"],
@@ -45,6 +46,7 @@ const questionSchema = z.object({
 const submissionSchema = z.object({
   studentID: z.string().min(3),
   studentName: z.string().min(2),
+  studentEmail: z.string().email("Invalid email format").optional(),
   answers: z.array(z.object({
     questionId: z.string(),
     answer: z.string().optional()

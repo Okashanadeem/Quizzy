@@ -15,6 +15,7 @@ const quizSchema = new mongoose.Schema({
   endTime: { type: Date, required: true },
   duration: { type: Number, required: true }, // in minutes
   unverifiedPassword: { type: String }, // Optional shared password for guest students
+  allowStudentCopy: { type: Boolean, default: false },
   questions: [questionSchema]
 }, { timestamps: true });
 

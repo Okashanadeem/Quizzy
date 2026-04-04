@@ -59,6 +59,7 @@ export default function AdminDashboard() {
   const [endTime, setEndTime] = useState('');
   const [duration, setDuration] = useState<number>(30);
   const [unverifiedPassword, setUnverifiedPassword] = useState('');
+  const [allowStudentCopy, setAllowStudentCopy] = useState(false);
 
   const router = useRouter();
 
@@ -124,7 +125,8 @@ export default function AdminDashboard() {
       startTime: new Date(startTime).toISOString(),
       endTime: new Date(endTime).toISOString(),
       duration: Number(duration),
-      unverifiedPassword
+      unverifiedPassword,
+      allowStudentCopy
     };
 
     try {
@@ -160,6 +162,7 @@ export default function AdminDashboard() {
     setEndTime(new Date(quiz.endTime).toISOString().slice(0, 16));
     setDuration(quiz.duration);
     setUnverifiedPassword(quiz.unverifiedPassword || '');
+    setAllowStudentCopy(quiz.allowStudentCopy || false);
     setShowModal(true);
   };
 
@@ -171,6 +174,7 @@ export default function AdminDashboard() {
     setEndTime('');
     setDuration(30);
     setUnverifiedPassword('');
+    setAllowStudentCopy(false);
   };
 
   const handleDeleteQuiz = async (id: string) => {
@@ -446,6 +450,19 @@ export default function AdminDashboard() {
                     onChange={(e) => setUnverifiedPassword(e.target.value)}
                   />
                 </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
+                <input
+                  type="checkbox"
+                  id="allowStudentCopy"
+                  className="w-5 h-5 accent-blue-600 cursor-pointer"
+                  checked={allowStudentCopy}
+                  onChange={(e) => setAllowStudentCopy(e.target.checked)}
+                />
+                <label htmlFor="allowStudentCopy" className="text-sm font-bold text-slate-700 cursor-pointer select-none">
+                  Allow students to receive a copy of their results via email
+                </label>
               </div>
 
               <div className="pt-4 flex gap-3">

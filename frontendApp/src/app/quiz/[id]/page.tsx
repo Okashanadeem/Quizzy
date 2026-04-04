@@ -49,6 +49,11 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   
+  // Post-submission Email Modal State
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [tempSubmissionData, setTempSubmissionData] = useState<any>(null);
+  const [studentEmail, setStudentEmail] = useState('');
+  
   const router = useRouter();
 
   // Initialization & Auto-Save Load
@@ -250,11 +255,12 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
     }
   };
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent, forceEmail?: string) => {
     if (e) e.preventDefault();
     if (isSubmitting) return;
     
-    if (e && !confirm('Are you sure you want to finish and submit your assessment?')) return;
+    // Initial Submit confirmation
+    if (e && !forceEmail && !confirm('Are you sure you want to finish and submit your assessment?')) return;
 
     if (!e) {
       if (visibilityEnded) {
@@ -272,11 +278,21 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
       const submissionData = {
         studentID: activeStudent.id,
         studentName: activeStudent.name,
+        studentEmail: forceEmail || studentEmail, // Use passed email or state
         answers: Object.entries(answers).map(([qId, ans]) => ({ questionId: qId, answer: ans })),
         tabSwitches: tabSwitches,
         isUnverified: isUnverifiedEntry,
         quizPassword: quizPassword
       };
+
+      // Check if we should ask for email first (only if allowStudentCopy is true and we haven't asked yet)
+      if (quiz.allowStudentCopy && !forceEmail && !showEmailModal) {
+        setTempSubmissionData(submissionData);
+        setShowEmailModal(true);
+        toast.dismiss(loadingToast);
+        setIsSubmitting(false);
+        return;
+      }
 
       const response = await fetch(
         `/api/quizzes/${quizId}/submit`,
@@ -302,6 +318,15 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleFinalSubmitWithEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSubmit(undefined, studentEmail);
+  };
+
+  const handleSkipEmail = () => {
+    handleSubmit(undefined, undefined);
   };
 
   if (loading || checkingStatus) return (
@@ -617,6 +642,51 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
           ></div>
         )}
       </main>
+
+      {/* Email Prompt Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={handleSkipEmail}></div>
+          <div className="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="p-8 text-center">
+              <div className="inline-flex p-4 rounded-3xl bg-blue-50 text-blue-600 mb-6">
+                <Send className="w-8 h-8" />
+              </div>
+              <h2 className="text-2xl font-black text-slate-900 mb-2">Want a Copy?</h2>
+              <p className="text-slate-500 italic font-medium">Your teacher has enabled result copies. Enter your email to receive your answer sheet.</p>
+              
+              <form onSubmit={handleFinalSubmitWithEmail} className="mt-8 space-y-4">
+                <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Your Email Address</label>
+                  <input 
+                    required 
+                    type="email" 
+                    placeholder="e.g. student@example.com" 
+                    className="w-full px-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 rounded-2xl outline-none font-bold"
+                    value={studentEmail}
+                    onChange={e => setStudentEmail(e.target.value)}
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                >
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-5 h-5" /> Send me the result</>}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={handleSkipEmail}
+                  disabled={isSubmitting}
+                  className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl font-bold hover:text-slate-600 transition-colors"
+                >
+                  No thanks, just submit
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

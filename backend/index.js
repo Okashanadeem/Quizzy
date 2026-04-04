@@ -225,65 +225,77 @@ app.post('/api/quizzes/:id/submit', validate(submissionSchema), async (req, res)
 
     await newSubmission.save();
 
-    // Send Detailed Email Notification
-    let emailSent = false;
-    const mailOptions = {
+    // Prepare Email Content
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+        <h2 style="color: #2c3e50; text-align: center;">Quiz Answer Sheet</h2>
+        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr><td style="padding: 5px; font-weight: bold;">Student Name</td><td style="padding: 5px;">${studentName}</td></tr>
+            <tr><td style="padding: 5px; font-weight: bold;">Student ID</td><td style="padding: 5px;">${studentID}</td></tr>
+            <tr><td style="padding: 5px; font-weight: bold;">Quiz Title</td><td style="padding: 5px;">${quiz.title}</td></tr>
+            <tr><td style="padding: 5px; font-weight: bold;">Total Score</td><td style="padding: 5px; font-size: 1.1em; color: #27ae60; font-weight: bold;">${totalScore} / ${maxPossibleScore}</td></tr>
+            <tr><td style="padding: 5px; font-weight: bold;">Tab Switches</td><td style="padding: 5px; color: ${tabSwitches > 0 ? '#e74c3c' : '#333'}">${tabSwitches}</td></tr>
+          </table>
+        </div>
+        
+        <h3 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;">Detailed Breakdown</h3>
+        ${gradedResults.map((res, idx) => `
+          <div style="margin-bottom: 15px; padding: 10px; border-left: 4px solid ${res.type === 'short' ? '#f1c40f' : (res.isCorrect ? '#2ecc71' : '#e74c3c')}; background-color: #fcfcfc;">
+            <p style="margin: 0 0 5px 0; font-weight: bold;">${idx + 1}. ${res.question}</p>
+            <p style="margin: 0; font-size: 0.9em;"><strong>Your Answer:</strong> ${res.studentAnswer}</p>
+            <p style="margin: 0; font-size: 0.9em;"><strong>Correct Answer:</strong> ${res.correctAnswer}</p>
+            <p style="margin: 5px 0 0 0; font-size: 0.8em; font-weight: bold; color: #7f8c8d;">
+              Marks: ${res.type === 'short' ? `Pending Review (Max: ${res.maxMarks})` : `${res.marksAwarded} / ${res.maxMarks}`}
+            </p>
+          </div>
+        `).join('')}
+        
+        <p style="margin-top: 30px; font-size: 0.8em; color: #95a5a6; text-align: center;">
+          Submitted at: ${new Date().toLocaleString()}<br/>
+          This is an automated copy of your assessment submission.
+        </p>
+      </div>
+    `;
+
+    // Send Detailed Email Notification to Teacher (Always)
+    const teacherMailOptions = {
       from: process.env.GMAIL_USER,
       to: process.env.GMAIL_USER,
       subject: `[QUIZ SUBMISSION] ${quiz.title} - ${studentName} (${studentID})`,
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-          <h2 style="color: #2c3e50;">Quiz Answer Sheet</h2>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Student Name</td><td style="padding: 8px; border: 1px solid #ddd;">${studentName}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Student ID</td><td style="padding: 8px; border: 1px solid #ddd;">${studentID}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Quiz Title</td><td style="padding: 8px; border: 1px solid #ddd;">${quiz.title}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Total Score</td><td style="padding: 8px; border: 1px solid #ddd; font-size: 1.2em; color: #27ae60; font-weight: bold;">${totalScore} / ${maxPossibleScore}</td></tr>
-            <tr><td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Tab Switches</td><td style="padding: 8px; border: 1px solid #ddd;">${tabSwitches}</td></tr>
-          </table>
-          <h3 style="color: #2c3e50;">Detailed Answers Breakdown</h3>
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="background-color: #f2f2f2;">
-                <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">#</th>
-                <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Question</th>
-                <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Student's Answer</th>
-                <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Correct Answer</th>
-                <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Marks</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${gradedResults.map((res, idx) => `
-                <tr>
-                  <td style="padding: 10px; border: 1px solid #ddd;">${idx + 1}</td>
-                  <td style="padding: 10px; border: 1px solid #ddd;">${res.question} <br/><small style="color: #7f8c8d;">(${res.type.toUpperCase()})</small></td>
-                  <td style="padding: 10px; border: 1px solid #ddd; background-color: ${res.type === 'short' ? '#fff3cd' : (res.isCorrect ? '#d4edda' : '#f8d7da')};">
-                    ${res.studentAnswer}
-                    ${res.type === 'short' ? '<br/><small style="color: #856404;">[Requires Manual Review]</small>' : ''}
-                  </td>
-                  <td style="padding: 10px; border: 1px solid #ddd;">${res.correctAnswer}</td>
-                  <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">
-                    ${res.type === 'short' ? `0 / ${res.maxMarks} (Pending)` : `${res.marksAwarded} / ${res.maxMarks}`}
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-          <p style="margin-top: 20px; font-size: 0.8em; color: #7f8c8d;">Submitted at: ${new Date().toLocaleString()}</p>
-        </div>
-      `,
+      html: emailHtml,
     };
 
     try {
-      await transporter.sendMail(mailOptions);
-      emailSent = true;
+      await transporter.sendMail(teacherMailOptions);
       newSubmission.emailSent = true;
       await newSubmission.save();
     } catch (err) {
-      console.error('Email Dispatch Error:', err);
+      console.error('Teacher Email Error:', err);
+    }
+
+    // Send copy to student if allowed and requested
+    const { studentEmail } = req.body;
+    if (quiz.allowStudentCopy && studentEmail) {
+      const studentMailOptions = {
+        from: process.env.GMAIL_USER,
+        to: studentEmail,
+        subject: `Your Quiz Results: ${quiz.title}`,
+        html: `
+          <p>Hello ${studentName},</p>
+          <p>Thank you for completing the assessment. Here is a copy of your responses and initial grading.</p>
+          ${emailHtml}
+        `,
+      };
+
+      try {
+        await transporter.sendMail(studentMailOptions);
+      } catch (err) {
+        console.error('Student Email Error:', err);
+      }
     }
     
-    res.status(200).json({ message: 'Submission successful', score: totalScore, maxScore: maxPossibleScore, emailSent });
+    res.status(200).json({ message: 'Submission successful', score: totalScore, maxScore: maxPossibleScore, emailSent: true });
   } catch (error) {
     console.error('Submit Error:', error);
     res.status(500).json({ message: 'Error processing submission', error: error.message });
