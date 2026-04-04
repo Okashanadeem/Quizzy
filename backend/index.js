@@ -118,7 +118,7 @@ app.post('/api/student/login', validate(studentLoginSchema), (req, res) => {
 // Public Student Route to fetch quizzes (Answers omitted for security)
 app.get('/api/quizzes', async (req, res) => {
   try {
-    const quizzes = await Quiz.find({}, '-questions.answer').sort({ startTime: 1 });
+    const quizzes = await Quiz.find({}, 'title startTime endTime duration allowStudentCopy').sort({ startTime: 1 });
     res.status(200).json(quizzes);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching quizzes' });
@@ -128,8 +128,18 @@ app.get('/api/quizzes', async (req, res) => {
 // Public Student Route to fetch a single quiz (Answers omitted)
 app.get('/api/quizzes/:id', async (req, res) => {
   try {
-    const quiz = await Quiz.findById(req.params.id, '-questions.answer');
+    const quiz = await Quiz.findById(req.params.id, 'title startTime endTime duration allowStudentCopy questions');
     if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+    
+    // Explicitly omit answers from the returned questions
+    quiz.questions = quiz.questions.map((q) => ({
+      id: q.id,
+      type: q.type,
+      question: q.question,
+      options: q.options,
+      marks: q.marks
+    }));
+
     res.status(200).json(quiz);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching quiz' });

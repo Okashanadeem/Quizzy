@@ -46,13 +46,14 @@ router.post('/login', validate(adminLoginSchema), (req, res) => {
 // Create Quiz
 router.post('/quizzes', authAdmin, validate(quizSchema), async (req, res) => {
   try {
-    const { title, startTime, endTime, duration, unverifiedPassword, questions } = req.body;
+    const { title, startTime, endTime, duration, unverifiedPassword, allowStudentCopy, questions } = req.body;
     const newQuiz = new Quiz({
       title,
       startTime,
       endTime,
       duration,
       unverifiedPassword,
+      allowStudentCopy,
       questions
     });
     await newQuiz.save();
@@ -114,11 +115,11 @@ router.delete('/quizzes/:id', authAdmin, async (req, res) => {
 router.patch('/quizzes/:id', authAdmin, validate(quizSchema), async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, startTime, endTime, duration, unverifiedPassword } = req.body;
+    const { title, startTime, endTime, duration, unverifiedPassword, allowStudentCopy } = req.body;
     
     const updatedQuiz = await Quiz.findByIdAndUpdate(
       id,
-      { title, startTime, endTime, duration, unverifiedPassword },
+      { title, startTime, endTime, duration, unverifiedPassword, allowStudentCopy },
       { new: true }
     );
     
