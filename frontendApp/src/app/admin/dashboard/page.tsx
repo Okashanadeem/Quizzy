@@ -176,7 +176,7 @@ export default function AdminDashboard() {
   const handleDeleteQuiz = async (id: string) => {
     if (!confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/quizzes/${id}`, {
+      const res = await fetch(`/api/admin/quizzes/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -345,21 +345,21 @@ export default function AdminDashboard() {
 
           {/* Pagination Controls */}
             {pagination.totalPages > 1 && (
-              <div className="mt-12 flex items-center justify-center gap-4">
+              <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
                 <button
                   disabled={pagination.currentPage === 1 || loading}
                   onClick={() => fetchQuizzes(pagination.currentPage - 1)}
-                  className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm"
+                  className="px-4 sm:px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-xs sm:text-sm hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm"
                 >
                   Previous
                 </button>
-                <span className="text-sm font-bold text-slate-500">
-                  Page {pagination.currentPage} of {pagination.totalPages}
+                <span className="text-xs sm:text-sm font-bold text-slate-500">
+                  Page {pagination.currentPage} / {pagination.totalPages}
                 </span>
                 <button
                   disabled={pagination.currentPage === pagination.totalPages || loading}
                   onClick={() => fetchQuizzes(pagination.currentPage + 1)}
-                  className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm"
+                  className="px-4 sm:px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-xs sm:text-sm hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm"
                 >
                   Next
                 </button>

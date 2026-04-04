@@ -148,12 +148,12 @@ export default function StudentDashboard() {
           </div>
 
           {/* Custom Tabs */}
-          <div className="flex gap-2 mt-10 p-1.5 bg-slate-100 rounded-2xl w-fit">
+          <div className="flex gap-2 mt-10 p-1.5 bg-slate-100 rounded-2xl w-full sm:w-fit overflow-x-auto no-scrollbar">
             <TabButton 
               active={activeTab === 'live'} 
               onClick={() => setActiveTab('live')}
               icon={<Play className="w-4 h-4" />}
-              label="Live Now"
+              label="Live"
               count={liveQuizzes.length}
               color="emerald"
             />
@@ -169,7 +169,7 @@ export default function StudentDashboard() {
               active={activeTab === 'past'} 
               onClick={() => setActiveTab('past')}
               icon={<History className="w-4 h-4" />}
-              label="Past Quizzes"
+              label="Past"
               count={pastQuizzes.length}
               color="slate"
             />
@@ -184,7 +184,7 @@ export default function StudentDashboard() {
               <BookOpen className="w-12 h-12" />
             </div>
             <h3 className="text-2xl font-bold text-slate-900">No quizzes here</h3>
-            <p className="text-slate-500 mt-2 max-w-sm mx-auto italic">There are no assessments in this category at the moment.</p>
+            <p className="text-slate-500 mt-2 max-w-sm mx-auto italic font-medium">There are no assessments in this category at the moment.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -195,7 +195,7 @@ export default function StudentDashboard() {
                   key={quiz._id}
                   className={`group bg-white rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 flex flex-col overflow-hidden ${isSubmitted ? 'opacity-75' : ''}`}
                 >
-                  <div className="p-8 flex-grow">
+                  <div className="p-6 sm:p-8 flex-grow">
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
                         <Timer className="w-3 h-3" />
@@ -211,7 +211,7 @@ export default function StudentDashboard() {
                       )}
                     </div>
 
-                    <h2 className="text-2xl font-black text-slate-900 mb-6 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
+                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 mb-6 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
                       {quiz.title}
                     </h2>
 
@@ -222,7 +222,7 @@ export default function StudentDashboard() {
                         </div>
                         <div>
                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Scheduled Date</p>
-                          <p className="text-sm font-bold text-slate-700">{new Date(quiz.startTime).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                          <p className="text-xs sm:text-sm font-bold text-slate-700">{new Date(quiz.startTime).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -231,7 +231,7 @@ export default function StudentDashboard() {
                         </div>
                         <div>
                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Visibility Window</p>
-                          <p className="text-sm font-bold text-slate-700">
+                          <p className="text-xs sm:text-sm font-bold text-slate-700">
                             {new Date(quiz.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(quiz.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
@@ -239,7 +239,7 @@ export default function StudentDashboard() {
                     </div>
                   </div>
 
-                  <div className="p-6 bg-slate-50/50 border-t border-slate-100 px-8 pb-8">
+                  <div className="p-6 bg-slate-50/50 border-t border-slate-100 px-6 sm:px-8 pb-8">
                     {isSubmitted ? (
                       <div className="w-full flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 py-4 rounded-2xl font-black text-sm border border-emerald-100 italic">
                         <CheckCircle2 className="w-4 h-4" />
@@ -286,11 +286,11 @@ function TabButton({ active, onClick, icon, label, count, color }: any) {
   return (
     <button 
       onClick={onClick}
-      className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${colors[color as keyof typeof colors]}`}
+      className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all whitespace-nowrap ${colors[color as keyof typeof colors]}`}
     >
       {icon}
       {label}
-      <span className={`ml-1 text-[10px] px-1.5 py-0.5 rounded-md ${active ? 'bg-white/20' : 'bg-slate-200 text-slate-600'}`}>
+      <span className={`ml-1 text-[8px] sm:text-[10px] px-1.5 py-0.5 rounded-md ${active ? 'bg-white/20' : 'bg-slate-200 text-slate-600'}`}>
         {count}
       </span>
     </button>

@@ -149,12 +149,29 @@ router.post('/quizzes/:id/questions', authAdmin, validate(questionSchema), async
 
     await quiz.save();
     res.status(200).json(quiz);
-  } catch (error) {
+    } catch (error) {
     res.status(500).json({ message: 'Error adding question', error: error.message });
-  }
-});
+    }
+    });
 
-// CSV Upload Questions (MCQ only)
+    // Delete Question
+    router.delete('/quizzes/:id/questions/:questionId', authAdmin, async (req, res) => {
+    try {
+    const { id, questionId } = req.params;
+
+    const quiz = await Quiz.findById(id);
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+
+    quiz.questions = quiz.questions.filter(q => q.id !== questionId);
+
+    await quiz.save();
+    res.status(200).json({ message: 'Question deleted successfully', quiz });
+    } catch (error) {
+    res.status(500).json({ message: 'Error deleting question', error: error.message });
+    }
+    });
+
+    // Upload Questions via CSV
 router.post('/quizzes/:id/questions/csv', authAdmin, upload.single('file'), async (req, res) => {
   try {
     const { id } = req.params;

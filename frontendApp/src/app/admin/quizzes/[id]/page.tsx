@@ -86,6 +86,25 @@ export default function ManageQuestions({ params }: { params: Promise<{ id: stri
     }
   };
 
+  const handleDeleteQuestion = async (questionId: string) => {
+    if (!confirm('Are you sure you want to delete this question?')) return;
+    
+    try {
+      const response = await fetch(`/api/admin/quizzes/${quizId}/questions/${questionId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (response.ok) {
+        toast.success('Question deleted');
+        fetchQuiz();
+      } else {
+        toast.error('Failed to delete question');
+      }
+    } catch (err) {
+      toast.error('Network error');
+    }
+  };
+
   const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
     const formData = new FormData();
@@ -343,7 +362,13 @@ export default function ManageQuestions({ params }: { params: Promise<{ id: stri
                             <p className="text-sm font-bold text-slate-700">
                               Correct Answer: <span className="text-emerald-600 ml-1">{q.answer || 'N/A'}</span>
                             </p>
-                            <button className="text-rose-500 p-2 hover:bg-rose-50 rounded-xl transition-colors">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteQuestion(q.id);
+                              }}
+                              className="text-rose-500 p-2 hover:bg-rose-50 rounded-xl transition-colors"
+                            >
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
