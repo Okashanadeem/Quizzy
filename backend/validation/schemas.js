@@ -46,7 +46,7 @@ const questionSchema = z.object({
 const submissionSchema = z.object({
   studentID: z.string().min(3),
   studentName: z.string().min(2),
-  studentEmail: z.string().email("Invalid email format").optional(),
+  studentEmail: z.string().email("Invalid email format").optional().or(z.literal('')),
   answers: z.array(z.object({
     questionId: z.string(),
     answer: z.string().optional()

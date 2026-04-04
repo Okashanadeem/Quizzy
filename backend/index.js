@@ -183,13 +183,13 @@ app.post('/api/quizzes/:id/submit', validate(submissionSchema), async (req, res)
     const gradedResults = quiz.questions.map(question => {
       maxPossibleScore += question.marks;
       const studentAns = answers.find(a => a.questionId === question.id);
-      const studentAnswerText = studentAns ? studentAns.answer : 'No Answer';
+      const studentAnswerText = (studentAns && studentAns.answer) ? studentAns.answer : 'No Answer';
       
       let marksAwarded = 0;
       let isCorrect = false;
 
       if (question.type === 'mcq') {
-        if (studentAnswerText.trim().toLowerCase() === question.answer.trim().toLowerCase()) {
+        if (studentAnswerText.trim().toLowerCase() === (question.answer || '').trim().toLowerCase()) {
           marksAwarded = question.marks;
           isCorrect = true;
         }
