@@ -26,6 +26,7 @@ interface Quiz {
   endTime: string;
   duration: number;
   unverifiedPassword?: string;
+  allowStudentCopy?: boolean;
   questions: any[];
 }
 
