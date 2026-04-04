@@ -134,7 +134,7 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
       document.removeEventListener('paste', preventAction);
       document.removeEventListener('contextmenu', preventAction);
     };
-  }, [quizId]);
+  }, [quizId, isAccessGranted]);
 
   // Set up attempt end time once access is granted
   useEffect(() => {
@@ -418,9 +418,9 @@ export default function QuizTaking({ params }: { params: Promise<{ id: string }>
   const progress = Math.round((Object.keys(answers).length / quiz.questions.length) * 100);
 
   return (
-    <div className="min-h-[100dvh] bg-slate-50 flex flex-col relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-slate-50 flex flex-col relative overflow-hidden pt-20">
       {/* Header bar */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-slate-200 h-16 sm:h-20 sticky top-0 z-50 flex items-center shadow-sm">
+      <header className="bg-white/90 backdrop-blur-md border-b border-slate-200 h-16 sm:h-20 sticky top-20 z-50 flex items-center shadow-sm">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 flex justify-between items-center">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="bg-slate-900 text-white p-2 sm:p-2.5 rounded-xl">
