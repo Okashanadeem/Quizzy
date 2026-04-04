@@ -89,6 +89,9 @@ export default function Navbar() {
 
   const isLoggedIn = isStudentLoggedIn || isAdminLoggedIn;
   const hideAuthButton = pathname === '/login' || pathname === '/admin/login';
+  const isQuizPage = pathname.startsWith('/quiz/');
+
+  if (isQuizPage) return null;
 
   return (
     <nav className={`bg-white/90 backdrop-blur-md border-b border-slate-200 fixed top-0 z-[100] w-full transition-transform duration-500 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
