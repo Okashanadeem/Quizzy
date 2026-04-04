@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 @layer base {
+  html, body {
+    @apply overflow-x-hidden max-w-full;
+  }
+  
   body {
-    @apply bg-slate-50 text-slate-900 antialiased overflow-x-hidden;
+    @apply bg-slate-50 text-slate-900 antialiased;
     font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     /* Smooth scrolling for anchor links */
     scroll-behavior: smooth;

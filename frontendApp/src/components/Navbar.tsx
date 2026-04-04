@@ -8,8 +8,34 @@ export default function Navbar() {
   const [isStudentLoggedIn, setIsStudentLoggedIn] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Always show navbar at the very top or if mobile menu is open
+      if (currentScrollY < 10 || isMobileMenuOpen) {
+        setIsVisible(true);
+      } 
+      // Scrolling down: hide navbar
+      else if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        setIsVisible(false);
+      } 
+      // Scrolling up: show navbar
+      else if (currentScrollY < lastScrollY) {
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, isMobileMenuOpen]);
 
   useEffect(() => {
     const checkAuthStatus = () => {
@@ -65,13 +91,13 @@ export default function Navbar() {
   const hideAuthButton = pathname === '/login' || pathname === '/admin/login';
 
   return (
-    <nav className="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-[100]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group z-[110]">
+    <nav className={`bg-white/90 backdrop-blur-md border-b border-slate-200 fixed top-0 z-[100] w-full transition-transform duration-500 ease-in-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between relative z-[110]">
+        <Link href="/" className="flex items-center gap-2 group shrink-0">
           <div className="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
             <Sparkles className="w-5 h-5 fill-current" />
           </div>
-          <span className="text-2xl font-black text-slate-900 tracking-tighter">Quizzy</span>
+          <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter">Quizzy</span>
         </Link>
         
         {/* Desktop Menu */}
@@ -130,7 +156,7 @@ export default function Navbar() {
           )}
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all z-[110]"
+            className="p-2 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -139,59 +165,59 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       <div 
-        className={`fixed inset-0 bg-white/80 backdrop-blur-2xl z-[90] md:hidden transition-all duration-500 ease-in-out ${
+        className={`fixed inset-0 bg-white/95 backdrop-blur-3xl z-[105] md:hidden transition-all duration-500 ease-in-out ${
           isMobileMenuOpen 
             ? 'opacity-100 pointer-events-auto translate-y-0' 
-            : 'opacity-0 pointer-events-none -translate-y-8'
+            : 'opacity-0 pointer-events-none -translate-y-full'
         }`}
       >
-        <div className="flex flex-col gap-4 pt-24 px-6">
+        <div className="flex flex-col gap-4 pt-28 px-6">
           {isStudentLoggedIn && (
             <Link 
               href="/dashboard" 
-              className={`flex items-center gap-3 p-4 rounded-2xl text-lg font-bold transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'} duration-300 delay-100 ${
-                pathname === '/dashboard' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-slate-100/50 text-slate-600'
+              className={`flex items-center gap-4 p-5 rounded-[2rem] text-xl font-black transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'} duration-500 delay-100 shadow-sm border ${
+                pathname === '/dashboard' ? 'bg-blue-600 text-white border-blue-500 shadow-blue-200' : 'bg-slate-50 text-slate-600 border-slate-100'
               }`}
             >
-              <GraduationCap className="w-6 h-6" />
+              <GraduationCap className="w-7 h-7" />
               Student Dashboard
             </Link>
           )}
           {isAdminLoggedIn && (
             <Link 
               href="/admin/dashboard" 
-              className={`flex items-center gap-3 p-4 rounded-2xl text-lg font-bold transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'} duration-300 delay-150 ${
-                pathname.startsWith('/admin') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'bg-slate-100/50 text-slate-600'
+              className={`flex items-center gap-4 p-5 rounded-[2rem] text-xl font-black transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'} duration-500 delay-150 shadow-sm border ${
+                pathname.startsWith('/admin') ? 'bg-slate-900 text-white border-slate-800 shadow-slate-200' : 'bg-slate-50 text-slate-600 border-slate-100'
               }`}
             >
-              <LayoutDashboard className="w-6 h-6" />
+              <LayoutDashboard className="w-7 h-7" />
               Admin Console
             </Link>
           )}
           
           {isLoggedIn ? (
-            <div className={`flex flex-col gap-3 transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'} duration-300 delay-200`}>
+            <div className={`flex flex-col gap-4 transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'} duration-500 delay-200`}>
               <Link 
                 href={isAdminLoggedIn ? "/admin/dashboard" : "/dashboard"}
-                className="flex items-center gap-3 p-4 rounded-2xl bg-blue-600 text-white text-lg font-bold shadow-xl shadow-blue-200"
+                className="flex items-center gap-4 p-5 rounded-[2rem] bg-blue-600 text-white text-xl font-black shadow-2xl shadow-blue-200 border border-blue-500"
               >
-                <LayoutDashboard className="w-6 h-6" />
+                <LayoutDashboard className="w-7 h-7" />
                 My Dashboard
               </Link>
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-3 p-4 rounded-2xl bg-rose-50/50 text-rose-600 text-lg font-bold border border-rose-100 backdrop-blur-md"
+                className="flex items-center gap-4 p-5 rounded-[2rem] bg-rose-50 text-rose-600 text-xl font-black border border-rose-100 shadow-sm"
               >
-                <LogOut className="w-6 h-6" />
+                <LogOut className="w-7 h-7" />
                 Sign Out
               </button>
             </div>
           ) : (
             <Link 
               href={pathname.startsWith('/admin') ? "/admin/login" : "/login"} 
-              className={`flex items-center justify-center gap-3 p-5 rounded-2xl bg-blue-600 text-white text-xl font-bold shadow-xl shadow-blue-200 transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'} duration-300 delay-200`}
+              className={`flex items-center justify-center gap-4 p-6 rounded-[2.5rem] bg-blue-600 text-white text-2xl font-black shadow-2xl shadow-blue-200 transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'} duration-500 delay-200 border border-blue-500`}
             >
-              <LogIn className="w-6 h-6" />
+              <LogIn className="w-8 h-8" />
               Sign In
             </Link>
           )}
