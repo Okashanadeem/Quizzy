@@ -1,7 +1,16 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, Lock, User, ArrowRight, Loader2 } from 'lucide-react';
+import { 
+  ShieldCheck, 
+  Lock, 
+  Mail, 
+  ArrowRight, 
+  Loader2, 
+  Sparkles,
+  ChevronLeft,
+  UserCircle2
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function AdminLogin() {
@@ -23,10 +32,25 @@ export default function AdminLogin() {
       });
 
       if (response.ok) {
-        localStorage.removeItem('student');
+        const data = await response.json();
         localStorage.setItem('isAdmin', 'true');
-        toast.success('Admin authentication successful!');
-        router.push('/admin/dashboard');
+        localStorage.setItem('userRole', data.role);
+        
+        toast.success(`Welcome back, ${data.role === 'superadmin' ? 'Super Admin' : 'Instructor'}!`, {
+            icon: '👋',
+            style: {
+                borderRadius: '1rem',
+                background: '#0f172a',
+                color: '#fff',
+                fontWeight: 'bold'
+            }
+        });
+        
+        if (data.role === 'superadmin') {
+          router.push('/admin/super');
+        } else {
+          router.push('/admin/dashboard');
+        }
       } else {
         const data = await response.json();
         toast.error(data.message || 'Access denied. Invalid credentials.');
@@ -39,84 +63,108 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-slate-50 px-6 py-12">
-      <div className="max-w-md w-full">
-        {/* Header */}
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Decorative Background */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-100/50 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-100/50 rounded-full blur-[100px]"></div>
+      </div>
+
+      <div className="max-w-md w-full relative z-10">
+        {/* Brand Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex p-4 rounded-3xl bg-slate-900 text-white mb-6 shadow-lg shadow-slate-200">
-            <ShieldCheck className="w-8 h-8" />
+          <div className="inline-flex p-4 rounded-[2rem] bg-slate-900 text-white mb-6 shadow-2xl shadow-slate-200 group hover:scale-105 transition-transform duration-500">
+            <ShieldCheck className="w-10 h-10 text-blue-400" />
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900">Admin Console</h1>
-          <p className="text-slate-500 mt-2 text-lg">Secure access for instructors</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2">Internal Portal</h1>
+          <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[10px]">
+            EazyQuizzy • Super Admin & Instructor Access
+          </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white p-8 rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100">
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-semibold text-slate-700 ml-1">
-                Username
-              </label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-slate-900 transition-colors">
-                  <User className="w-5 h-5" />
-                </div>
-                <input
-                  id="username"
-                  type="text"
-                  required
-                  placeholder="admin_username"
-                  className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border-transparent focus:bg-white focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5 rounded-2xl transition-all outline-none text-slate-900 placeholder:text-slate-400 font-medium"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-              </div>
-            </div>
+        <div className="bg-white p-10 rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(15,23,42,0.1)] border border-slate-100 relative overflow-hidden">
+          {/* Subtle accent bar */}
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-semibold text-slate-700 ml-1">
-                Password
-              </label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-slate-900 transition-colors">
-                  <Lock className="w-5 h-5" />
+          <form onSubmit={handleLogin} className="space-y-8">
+            <div className="space-y-6">
+              {/* Username/Email Field */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <UserCircle2 className="w-3 h-3" />
+                  Admin ID or Email
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-600 transition-colors">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="admin_root or email@edu.com"
+                    className="block w-full pl-14 pr-6 py-5 bg-slate-50 border-transparent focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 rounded-2xl transition-all outline-none text-slate-900 font-bold placeholder:text-slate-300 placeholder:font-medium"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
                 </div>
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border-transparent focus:bg-white focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5 rounded-2xl transition-all outline-none text-slate-900 placeholder:text-slate-400 font-medium"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+              </div>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  <Lock className="w-3 h-3" />
+                  Secret Key
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-300 group-focus-within:text-blue-600 transition-colors">
+                    <Lock className="w-5 h-5" />
+                  </div>
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••••••"
+                    className="block w-full pl-14 pr-6 py-5 bg-slate-50 border-transparent focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 rounded-2xl transition-all outline-none text-slate-900 font-bold placeholder:text-slate-300 placeholder:font-medium tracking-widest"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center items-center gap-2 py-4 px-4 bg-slate-900 text-white text-lg font-bold rounded-2xl hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-900/10 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg shadow-slate-200"
+              className="group relative w-full flex justify-center items-center gap-3 py-5 px-6 bg-slate-900 text-white text-xl font-black rounded-3xl hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-900/10 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-2xl shadow-slate-200 active:scale-[0.98]"
             >
               {loading ? (
-                <Loader2 className="w-6 h-6 animate-spin" />
+                <Loader2 className="w-7 h-7 animate-spin" />
               ) : (
                 <>
-                  Sign In
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  Authenticate Access
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1.5 transition-transform text-blue-400" />
                 </>
               )}
             </button>
           </form>
+
+          <div className="mt-10 pt-8 border-t border-slate-50 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3 text-blue-500 fill-current" />
+                Encrypted Session
+            </span>
+            <span>v2.0 Enterprise</span>
+          </div>
         </div>
 
-        {/* Footer Link */}
-        <p className="text-center mt-8">
+        {/* Back Button */}
+        <p className="text-center mt-10">
           <button 
             onClick={() => router.push('/')}
-            className="text-slate-500 hover:text-slate-900 text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 text-xs font-black uppercase tracking-widest transition-all group"
           >
-            &larr; Back to main site
+            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Public Site
           </button>
         </p>
       </div>

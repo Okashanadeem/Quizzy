@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const submissionSchema = new mongoose.Schema({
   studentID: { type: String, required: true },
   studentName: { type: String, required: true },
+  studentEmail: { type: String, required: true },
   quizID: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz', required: true },
   answers: [
     {
@@ -14,7 +15,6 @@ const submissionSchema = new mongoose.Schema({
   maxScore: { type: Number, default: 0 },
   tabSwitches: { type: Number, default: 0 },
   emailSent: { type: Boolean, default: false },
-  isUnverified: { type: Boolean, default: false },
   submittedAt: { type: Date, default: Date.now }
 });
 

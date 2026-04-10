@@ -36,6 +36,7 @@ const questionSchema = z.object({
   if (data.type === 'mcq') {
     return data.options && data.options.length >= 2 && data.answer;
   }
+  // Short answer doesn't REQUIRE an answer during creation
   return true;
 }, {
   message: "MCQ must have at least 2 options and a correct answer",

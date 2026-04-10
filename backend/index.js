@@ -43,9 +43,10 @@ const connectDB = async () => {
     const db = await mongoose.connect(process.env.MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
     });
-    isConnected = db.connections[0].readyState === 1;
-    console.log('✅ Connected to MongoDB Atlas');
+    isConnected = mongoose.connection.readyState === 1;
+    console.log('✅ Connected to MongoDB');
   } catch (err) {
+    isConnected = false;
     console.error('❌ MongoDB Connection Error:', err.message);
   }
 };
@@ -90,49 +91,24 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Student Login Route
-app.post('/api/student/login', validate(studentLoginSchema), (req, res) => {
-  const { name, studentId } = req.body;
+// Unified Quiz Join Route (No login needed)
+app.get('/api/quizzes/join/:code', async (req, res) => {
   try {
-    const studentsFilePath = path.join(__dirname, 'data', 'students.json');
-    if (!fs.existsSync(studentsFilePath)) {
-      console.error('❌ Missing students.json file at:', studentsFilePath);
-      return res.status(500).json({ message: 'Server configuration error: student data missing' });
-    }
-    const studentsData = JSON.parse(fs.readFileSync(studentsFilePath, 'utf8'));
-    const student = studentsData.find(
-      (s) => s.name.toLowerCase() === name.toLowerCase() && s.id === studentId
-    );
-
-    if (student) {
-      res.status(200).json(student);
-    } else {
-      res.status(401).json({ message: 'Invalid credentials' });
-    }
-  } catch (error) {
-    console.error('Login Error:', error);
-    res.status(500).json({ message: 'Error processing login' });
-  }
-});
-
-// Public Student Route to fetch quizzes (Answers omitted for security)
-app.get('/api/quizzes', async (req, res) => {
-  try {
-    const quizzes = await Quiz.find({}, 'title startTime endTime duration allowStudentCopy').sort({ startTime: 1 });
-    res.status(200).json(quizzes);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching quizzes' });
-  }
-});
-
-// Public Student Route to fetch a single quiz (Answers omitted)
-app.get('/api/quizzes/:id', async (req, res) => {
-  try {
-    const quiz = await Quiz.findById(req.params.id, 'title startTime endTime duration allowStudentCopy questions');
-    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+    const { code } = req.params;
+    const quiz = await Quiz.findOne({ accessCode: code.toUpperCase() }, 'title startTime endTime duration allowStudentResultsEmail questions');
     
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found. Please check the access code.' });
+    
+    const now = new Date();
+    if (now < new Date(quiz.startTime)) {
+        return res.status(403).json({ message: 'Quiz has not started yet.', startTime: quiz.startTime });
+    }
+    if (now > new Date(quiz.endTime)) {
+        return res.status(403).json({ message: 'Quiz has already ended.' });
+    }
+
     // Explicitly omit answers from the returned questions
-    quiz.questions = quiz.questions.map((q) => ({
+    const questionsWithoutAnswers = quiz.questions.map((q) => ({
       id: q.id,
       type: q.type,
       question: q.question,
@@ -140,9 +116,89 @@ app.get('/api/quizzes/:id', async (req, res) => {
       marks: q.marks
     }));
 
-    res.status(200).json(quiz);
+    res.status(200).json({
+        _id: quiz._id,
+        title: quiz.title,
+        duration: quiz.duration,
+        endTime: quiz.endTime,
+        questions: questionsWithoutAnswers
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching quiz' });
+    res.status(500).json({ message: 'Error joining quiz' });
+  }
+});
+
+// Get Quiz by ID (Student access, no answers)
+app.get('/api/quizzes/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const quiz = await Quiz.findById(id, 'title startTime endTime duration allowStudentResultsEmail questions');
+    
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+    
+    const now = new Date();
+    if (now < new Date(quiz.startTime)) {
+        return res.status(403).json({ message: 'Quiz has not started yet.', startTime: quiz.startTime });
+    }
+    if (now > new Date(quiz.endTime)) {
+        return res.status(403).json({ message: 'Quiz has already ended.' });
+    }
+
+    // Explicitly omit answers
+    const questionsWithoutAnswers = quiz.questions.map((q) => ({
+      id: q.id,
+      type: q.type,
+      question: q.question,
+      options: q.options,
+      marks: q.marks
+    }));
+
+    res.status(200).json({
+        _id: quiz._id,
+        title: quiz.title,
+        duration: quiz.duration,
+        endTime: quiz.endTime,
+        questions: questionsWithoutAnswers
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error loading quiz' });
+  }
+});
+
+// Student Fetch Quiz by ID (No login needed, but returns public data only)
+app.get('/api/quizzes/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const quiz = await Quiz.findById(id, 'title startTime endTime duration allowStudentResultsEmail questions');
+    
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found.' });
+    
+    const now = new Date();
+    if (now < new Date(quiz.startTime)) {
+        return res.status(403).json({ message: 'Quiz has not started yet.', startTime: quiz.startTime });
+    }
+    if (now > new Date(quiz.endTime)) {
+        return res.status(403).json({ message: 'Quiz has already ended.' });
+    }
+
+    // Explicitly omit answers from the returned questions
+    const questionsWithoutAnswers = quiz.questions.map((q) => ({
+      id: q.id,
+      type: q.type,
+      question: q.question,
+      options: q.options,
+      marks: q.marks
+    }));
+
+    res.status(200).json({
+        _id: quiz._id,
+        title: quiz.title,
+        duration: quiz.duration,
+        endTime: quiz.endTime,
+        questions: questionsWithoutAnswers
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching quiz content' });
   }
 });
 
@@ -161,7 +217,7 @@ app.get('/api/submissions/check/:quizId/:studentId', async (req, res) => {
 app.post('/api/quizzes/:id/submit', validate(submissionSchema), async (req, res) => {
   try {
     const { id: quizId } = req.params;
-    const { studentID, studentName, tabSwitches, answers, quizPassword, isUnverified } = req.body;
+    const { studentID, studentName, studentEmail, tabSwitches, answers } = req.body;
     
     const quiz = await Quiz.findById(quizId);
     if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
@@ -170,13 +226,6 @@ app.post('/api/quizzes/:id/submit', validate(submissionSchema), async (req, res)
     const existing = await Submission.findOne({ quizID: quizId, studentID: studentID });
     if (existing) {
       return res.status(403).json({ message: 'You have already submitted this quiz.' });
-    }
-
-    // Check quiz password for unverified students
-    if (isUnverified) {
-      if (!quiz.unverifiedPassword || quiz.unverifiedPassword !== quizPassword) {
-        return res.status(401).json({ message: 'Invalid Quiz Access Password.' });
-      }
     }
 
     // Validate time window (allow 60s grace period)
@@ -224,12 +273,12 @@ app.post('/api/quizzes/:id/submit', validate(submissionSchema), async (req, res)
     const newSubmission = new Submission({
       studentID,
       studentName,
+      studentEmail,
       quizID: quizId,
       answers: answers.map(a => ({ questionId: a.questionId, answer: a.answer })),
       score: totalScore,
       maxScore: maxPossibleScore,
       tabSwitches: parseInt(tabSwitches) || 0,
-      isUnverified: !!isUnverified,
       submittedAt: new Date()
     });
 
@@ -269,37 +318,35 @@ app.post('/api/quizzes/:id/submit', validate(submissionSchema), async (req, res)
     `;
 
     // Send Detailed Email Notification to Teacher (Always)
+    // In multi-tenant, teacher email is needed. We populate teacherId to get their email.
+    const populatedQuiz = await Quiz.findById(quizId).populate('teacherId');
+    const teacherEmail = populatedQuiz.teacherId ? populatedQuiz.teacherId.email : process.env.GMAIL_USER;
+
     const teacherMailOptions = {
       from: process.env.GMAIL_USER,
-      to: process.env.GMAIL_USER,
+      to: teacherEmail,
       subject: `[QUIZ SUBMISSION] ${quiz.title} - ${studentName} (${studentID})`,
       html: emailHtml,
     };
 
     try {
-      await transporter.sendMail(teacherMailOptions);
+      const { sendEmail } = require('./utils/email');
+      await sendEmail(teacherMailOptions.to, teacherMailOptions.subject, teacherMailOptions.html);
       newSubmission.emailSent = true;
       await newSubmission.save();
     } catch (err) {
       console.error('Teacher Email Error:', err);
     }
 
-    // Send copy to student if allowed and requested
-    const { studentEmail } = req.body;
-    if (quiz.allowStudentCopy && studentEmail) {
-      const studentMailOptions = {
-        from: process.env.GMAIL_USER,
-        to: studentEmail,
-        subject: `Your Quiz Results: ${quiz.title}`,
-        html: `
+    // Send copy to student if allowed
+    if (quiz.allowStudentResultsEmail && studentEmail) {
+      try {
+        const { sendEmail } = require('./utils/email');
+        await sendEmail(studentEmail, `Your Quiz Results: ${quiz.title}`, `
           <p>Hello ${studentName},</p>
           <p>Thank you for completing the assessment. Here is a copy of your responses and initial grading.</p>
           ${emailHtml}
-        `,
-      };
-
-      try {
-        await transporter.sendMail(studentMailOptions);
+        `);
       } catch (err) {
         console.error('Student Email Error:', err);
       }

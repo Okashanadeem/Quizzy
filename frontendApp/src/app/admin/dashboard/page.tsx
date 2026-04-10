@@ -14,19 +14,23 @@ import {
   Loader2,
   X,
   AlertCircle,
-  Lock,
-  RefreshCw
+  Copy,
+  Check,
+  RefreshCw,
+  Hash,
+  KeyRound,
+  Lock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Quiz {
   _id: string;
   title: string;
+  accessCode: string;
   startTime: string;
   endTime: string;
   duration: number;
-  unverifiedPassword?: string;
-  allowStudentCopy?: boolean;
+  allowStudentResultsEmail?: boolean;
   questions: any[];
 }
 
@@ -52,15 +56,22 @@ export default function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   // Quiz Form State
   const [title, setTitle] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [duration, setDuration] = useState<number>(30);
-  const [unverifiedPassword, setUnverifiedPassword] = useState('');
-  const [allowStudentCopy, setAllowStudentCopy] = useState(false);
+  const [allowStudentResultsEmail, setAllowStudentResultsEmail] = useState(false);
+
+  // Password Form State
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
 
   const router = useRouter();
 
@@ -71,8 +82,50 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    const role = localStorage.getItem('userRole');
+    if (role === 'superadmin') {
+      router.push('/admin/super');
+      return;
+    }
     fetchAll();
-  }, []);
+  }, [router]);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    if (newPassword.length < 5) {
+      toast.error('New password must be at least 5 characters');
+      return;
+    }
+
+    setPasswordSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/profile/password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+        credentials: 'include'
+      });
+
+      if (res.ok) {
+        toast.success('Password updated successfully');
+        setShowPasswordModal(false);
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        const data = await res.json();
+        toast.error(data.message || 'Failed to update password');
+      }
+    } catch (err) {
+      toast.error('Network error occurred');
+    } finally {
+      setPasswordSubmitting(false);
+    }
+  };
 
   const fetchQuizzes = async (page = 1) => {
     try {
@@ -126,8 +179,7 @@ export default function AdminDashboard() {
       startTime: new Date(startTime).toISOString(),
       endTime: new Date(endTime).toISOString(),
       duration: Number(duration),
-      unverifiedPassword,
-      allowStudentCopy
+      allowStudentResultsEmail
     };
 
     try {
@@ -156,14 +208,20 @@ export default function AdminDashboard() {
     }
   };
 
+  const toLocalISOString = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+    return localDate.toISOString().slice(0, 16);
+  };
+
   const openEditModal = (quiz: Quiz) => {
     setEditingQuiz(quiz);
     setTitle(quiz.title);
-    setStartTime(new Date(quiz.startTime).toISOString().slice(0, 16));
-    setEndTime(new Date(quiz.endTime).toISOString().slice(0, 16));
+    setStartTime(toLocalISOString(quiz.startTime));
+    setEndTime(toLocalISOString(quiz.endTime));
     setDuration(quiz.duration);
-    setUnverifiedPassword(quiz.unverifiedPassword || '');
-    setAllowStudentCopy(quiz.allowStudentCopy || false);
+    setAllowStudentResultsEmail(quiz.allowStudentResultsEmail || false);
     setShowModal(true);
   };
 
@@ -174,8 +232,7 @@ export default function AdminDashboard() {
     setStartTime('');
     setEndTime('');
     setDuration(30);
-    setUnverifiedPassword('');
-    setAllowStudentCopy(false);
+    setAllowStudentResultsEmail(false);
   };
 
   const handleDeleteQuiz = async (id: string) => {
@@ -197,6 +254,18 @@ export default function AdminDashboard() {
     }
   };
 
+  const copyInvite = (quiz: Quiz) => {
+    const date = new Date(quiz.startTime).toLocaleDateString();
+    const time = new Date(quiz.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const baseUrl = window.location.origin;
+    const inviteText = `You are invited to take the quiz: ${quiz.title}. \nDate: ${date}, \nTime: ${time}. \nAccess Code: ${quiz.accessCode}. \nJoin at: ${baseUrl}/join`;
+    
+    navigator.clipboard.writeText(inviteText);
+    setCopiedCode(quiz._id);
+    toast.success('Invitation template copied to clipboard!');
+    setTimeout(() => setCopiedCode(null), 3000);
+  };
+
   const getQuizStatus = (start: string, end: string) => {
     const now = new Date();
     const s = new Date(start);
@@ -213,10 +282,17 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Admin Dashboard</h1>
+              <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Teacher Dashboard</h1>
               <p className="text-slate-500 mt-2 text-lg">Manage your assessments and track student progress</p>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowPasswordModal(true)}
+                className="p-3.5 bg-white border border-slate-200 text-slate-500 rounded-2xl hover:bg-slate-50 transition-all shadow-sm active:scale-95"
+                title="Change Password"
+              >
+                <KeyRound className="w-5 h-5" />
+              </button>
               <button
                 onClick={() => fetchAll()}
                 disabled={loading}
@@ -237,7 +313,7 @@ export default function AdminDashboard() {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
-            <StatCard icon={<BookOpen className="text-blue-600" />} label="Total Quizzes" value={stats.totalQuizzes} />
+            <StatCard icon={<BookOpen className="text-blue-600" />} label="My Quizzes" value={stats.totalQuizzes} />
             <StatCard icon={<Activity className="text-emerald-600" />} label="Active Now" value={stats.activeQuizzes} />
             <StatCard icon={<Users className="text-indigo-600" />} label="Submissions" value={stats.totalSubmissions} />
             <StatCard icon={<Calendar className="text-amber-600" />} label="Upcoming" value={stats.upcomingQuizzes} />
@@ -288,13 +364,26 @@ export default function AdminDashboard() {
                       <span className={`px-3 py-1 rounded-full text-xs font-bold border ${status.color}`}>
                         {status.label}
                       </span>
-                      <div className="flex items-center gap-1 text-slate-400 text-sm font-medium">
-                        <Clock className="w-4 h-4" />
-                        {quiz.duration}m
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1 text-slate-400 text-sm font-medium">
+                          <Clock className="w-4 h-4" />
+                          {quiz.duration}m
+                        </div>
+                        <button 
+                          onClick={() => copyInvite(quiz)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${copiedCode === quiz._id ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}
+                        >
+                          {copiedCode === quiz._id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                          {copiedCode === quiz._id ? 'Copied' : 'Invite'}
+                        </button>
                       </div>
                     </div>
                     
-                    <h2 className="text-xl font-bold text-slate-900 mb-6 line-clamp-2 group-hover:text-blue-600 transition-colors">{quiz.title}</h2>
+                    <h2 className="text-xl font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">{quiz.title}</h2>
+                    <div className="flex items-center gap-1.5 mb-6">
+                        <Hash className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="text-sm font-black text-slate-900 tracking-wider font-mono">{quiz.accessCode}</span>
+                    </div>
                     
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
@@ -333,7 +422,7 @@ export default function AdminDashboard() {
                       onClick={() => openEditModal(quiz)}
                       className="col-span-1 flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-600 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-100 transition-all"
                     >
-                      Visibility
+                      Settings
                     </button>
                     <button
                       onClick={() => handleDeleteQuiz(quiz._id)}
@@ -439,30 +528,16 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Unverified Student Password (Optional)</label>
-                <div className="relative">
-                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Shared password for guests"
-                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl transition-all outline-none font-medium"
-                    value={unverifiedPassword}
-                    onChange={(e) => setUnverifiedPassword(e.target.value)}
-                  />
-                </div>
-              </div>
-
               <div className="flex items-center gap-3 p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
                 <input
                   type="checkbox"
-                  id="allowStudentCopy"
+                  id="allowStudentResultsEmail"
                   className="w-5 h-5 accent-blue-600 cursor-pointer"
-                  checked={allowStudentCopy}
-                  onChange={(e) => setAllowStudentCopy(e.target.checked)}
+                  checked={allowStudentResultsEmail}
+                  onChange={(e) => setAllowStudentResultsEmail(e.target.checked)}
                 />
-                <label htmlFor="allowStudentCopy" className="text-sm font-bold text-slate-700 cursor-pointer select-none">
-                  Allow students to receive a copy of their results via email
+                <label htmlFor="allowStudentResultsEmail" className="text-sm font-bold text-slate-700 cursor-pointer select-none">
+                  Send results to student's email upon submission
                 </label>
               </div>
 
@@ -479,6 +554,82 @@ export default function AdminDashboard() {
                   className="flex-[2] px-6 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-[0.98]"
                 >
                   {editingQuiz ? 'Update Quiz' : 'Create Quiz'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setShowPasswordModal(false)}></div>
+          <div className="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-8 pt-8 pb-4 flex justify-between items-center">
+              <h2 className="text-2xl font-black text-slate-900">Change Password</h2>
+              <button onClick={() => setShowPasswordModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-900">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 ml-1">Current Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl transition-all outline-none font-medium"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 ml-1">New Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl transition-all outline-none font-medium"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 ml-1">Confirm New Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    className="w-full pl-12 pr-5 py-4 bg-slate-50 border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl transition-all outline-none font-medium"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordModal(false)}
+                  className="flex-1 px-6 py-4 bg-slate-100 text-slate-700 font-bold rounded-2xl hover:bg-slate-200 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordSubmitting}
+                  className="flex-[2] px-6 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 flex items-center justify-center"
+                >
+                  {passwordSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Update Password'}
                 </button>
               </div>
             </form>

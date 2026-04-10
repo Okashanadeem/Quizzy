@@ -45,43 +45,23 @@ export default function Home() {
           </h1>
           
           <p className="max-w-2xl mx-auto text-base sm:text-lg lg:text-xl text-slate-500 mb-14 font-medium leading-relaxed italic animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-            Quizzy provides a streamlined, secure environment for creating and taking assessments. 
+            EazyQuizzy provides a streamlined, secure environment for creating and taking assessments. 
             Experience automated grading and detailed reporting today.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-lg mx-auto sm:max-w-none animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
-            {isStudentLoggedIn ? (
-              <Link
-                href="/dashboard"
-                className="group w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 rounded-2xl bg-blue-600 text-white font-black text-base sm:text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 hover:shadow-2xl hover:shadow-blue-300 flex items-center justify-center gap-3 active:scale-[0.98]"
-              >
-                <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6" />
-                Go to My Dashboard
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            ) : (
-              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <Link
-                  href="/login"
-                  className="group w-full sm:w-auto px-8 py-4 sm:py-5 rounded-2xl bg-slate-900 text-white font-black text-base sm:text-lg hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-3 active:scale-[0.98]"
-                >
-                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
-                  Student Login
-                </Link>
-                <Link
-                  href="/join"
-                  className="group w-full sm:w-auto px-8 py-4 sm:py-5 rounded-2xl bg-white text-slate-900 font-black text-base sm:text-lg border-2 border-slate-100 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all flex items-center justify-center gap-3 active:scale-[0.98] shadow-lg shadow-slate-100/50"
-                >
-                  <Zap className="w-5 h-5 sm:w-6 sm:h-6 fill-current text-indigo-500" />
-                  Join as Guest
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform opacity-50" />
-                </Link>
-              </div>
-            )}
+            <Link
+              href="/join"
+              className="group w-full sm:w-auto px-8 py-4 sm:py-5 rounded-2xl bg-blue-600 text-white font-black text-base sm:text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-3 active:scale-[0.98]"
+            >
+              <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              Join Assessment
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
 
             {isAdminLoggedIn ? (
               <Link
-                href="/admin/dashboard"
+                href={localStorage.getItem('userRole') === 'superadmin' ? "/admin/super" : "/admin/dashboard"}
                 className="w-full sm:w-auto px-8 py-4 sm:py-5 rounded-2xl bg-white text-slate-900 font-black text-base sm:text-lg border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-3 active:scale-[0.98]"
               >
                 <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
@@ -93,7 +73,7 @@ export default function Home() {
                 className="w-full sm:w-auto px-8 py-4 sm:py-5 rounded-2xl bg-white text-slate-900 font-black text-base sm:text-lg border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-3 active:scale-[0.98]"
               >
                 <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
-                Admin Portal
+                Instructor Login
               </Link>
             )}
           </div>

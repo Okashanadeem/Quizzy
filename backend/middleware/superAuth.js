@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const authAdmin = (req, res, next) => {
+const superAuth = (req, res, next) => {
   const token = req.cookies.adminToken;
 
   if (!token) {
@@ -9,8 +9,8 @@ const authAdmin = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'superadmin' && decoded.role !== 'teacher') {
-      return res.status(403).json({ message: 'Access denied. Unauthorized role.' });
+    if (decoded.role !== 'superadmin') {
+      return res.status(403).json({ message: 'Access denied. Super Admin only.' });
     }
     req.admin = decoded;
     next();
@@ -19,4 +19,4 @@ const authAdmin = (req, res, next) => {
   }
 };
 
-module.exports = authAdmin;
+module.exports = superAuth;

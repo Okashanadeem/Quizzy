@@ -39,56 +39,35 @@ export default function Navbar() {
 
   useEffect(() => {
     const checkAuthStatus = () => {
-      const studentData = localStorage.getItem('student');
       const isAdminData = localStorage.getItem('isAdmin');
-      
-      if (studentData && isAdminData) {
-        if (pathname.startsWith('/admin')) {
-          setIsAdminLoggedIn(true);
-          setIsStudentLoggedIn(false);
-        } else {
-          setIsAdminLoggedIn(false);
-          setIsStudentLoggedIn(true);
-        }
-      } else {
-        setIsStudentLoggedIn(!!studentData);
-        setIsAdminLoggedIn(!!isAdminData);
-      }
+      setIsAdminLoggedIn(!!isAdminData);
     };
     
     checkAuthStatus();
     window.addEventListener('storage', checkAuthStatus);
     return () => window.removeEventListener('storage', checkAuthStatus);
-  }, [pathname]);
+  }, []);
 
-  // Close mobile menu when pathname changes
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
+  // ... (rest of the file logic)
 
   const handleSignOut = async () => {
-    if (isAdminLoggedIn) {
-      try {
-        await fetch(`/api/admin/logout`, { 
-          method: 'POST',
-          credentials: 'include' 
-        });
-      } catch (err) {
-        console.error('Backend logout call failed, clearing local session anyway:', err);
-      } finally {
-        localStorage.removeItem('isAdmin');
-        setIsAdminLoggedIn(false);
-        router.push('/');
-      }
-    } else {
-      localStorage.removeItem('student');
-      setIsStudentLoggedIn(false);
+    try {
+      await fetch(`/api/admin/logout`, { 
+        method: 'POST',
+        credentials: 'include' 
+      });
+    } catch (err) {
+      console.error('Backend logout call failed, clearing local session anyway:', err);
+    } finally {
+      localStorage.removeItem('isAdmin');
+      localStorage.removeItem('userRole');
+      setIsAdminLoggedIn(false);
       router.push('/');
     }
   };
 
-  const isLoggedIn = isStudentLoggedIn || isAdminLoggedIn;
-  const hideAuthButton = pathname === '/login' || pathname === '/admin/login';
+  const isLoggedIn = isAdminLoggedIn;
+  const hideAuthButton = pathname === '/admin/login';
   const isQuizPage = pathname.startsWith('/quiz/');
 
   if (isQuizPage) return null;
@@ -100,21 +79,19 @@ export default function Navbar() {
           <div className="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
             <Sparkles className="w-5 h-5 fill-current" />
           </div>
-          <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter">Quizzy</span>
+          <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tighter">EazyQuizzy</span>
         </Link>
         
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6">
           {!hideAuthButton && (
             <div className="flex items-center gap-1">
-              {isStudentLoggedIn && (
-                <Link href="/dashboard" className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${pathname === '/dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
-                  <GraduationCap className="w-4 h-4" />
-                  Student Dashboard
-                </Link>
-              )}
+              <Link href="/join" className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${pathname === '/join' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+                <GraduationCap className="w-4 h-4" />
+                Join Quiz
+              </Link>
               {isAdminLoggedIn && (
-                <Link href="/admin/dashboard" className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${pathname.startsWith('/admin') ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
+                <Link href={localStorage.getItem('userRole') === 'superadmin' ? "/admin/super" : "/admin/dashboard"} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${pathname.startsWith('/admin') ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}>
                   <LayoutDashboard className="w-4 h-4" />
                   Admin Console
                 </Link>
@@ -125,26 +102,19 @@ export default function Navbar() {
           {!hideAuthButton && (
             isLoggedIn ? (
               <div className="flex items-center gap-2">
-                <Link 
-                  href={isAdminLoggedIn ? "/admin/dashboard" : "/dashboard"}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-black hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  My Dashboard
-                </Link>
-                
                 <button
                   onClick={handleSignOut}
                   title="Sign Out"
-                  className="flex items-center justify-center p-2.5 rounded-xl bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-all border border-transparent hover:border-rose-100"
+                  className="flex items-center justify-center p-2.5 rounded-xl bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-all border border-transparent hover:border-rose-100 font-bold gap-2 px-4"
                 >
                   <LogOut className="w-5 h-5" />
+                  Sign Out
                 </button>
               </div>
             ) : (
-              <Link href={pathname.startsWith('/admin') ? "/admin/login" : "/login"} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-black hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95">
+              <Link href="/admin/login" className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-black hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95">
                 <LogIn className="w-4 h-4" />
-                Sign In
+                Instructor Login
               </Link>
             )
           )}
@@ -175,20 +145,19 @@ export default function Navbar() {
         }`}
       >
         <div className="flex flex-col gap-4 pt-28 px-6">
-          {isStudentLoggedIn && (
-            <Link 
-              href="/dashboard" 
-              className={`flex items-center gap-4 p-5 rounded-[2rem] text-xl font-black transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'} duration-500 delay-100 shadow-sm border ${
-                pathname === '/dashboard' ? 'bg-blue-600 text-white border-blue-500 shadow-blue-200' : 'bg-slate-50 text-slate-600 border-slate-100'
-              }`}
-            >
-              <GraduationCap className="w-7 h-7" />
-              Student Dashboard
-            </Link>
-          )}
+          <Link 
+            href="/join" 
+            className={`flex items-center gap-4 p-5 rounded-[2rem] text-xl font-black transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'} duration-500 delay-100 shadow-sm border ${
+              pathname === '/join' ? 'bg-blue-600 text-white border-blue-500 shadow-blue-200' : 'bg-slate-50 text-slate-600 border-slate-100'
+            }`}
+          >
+            <GraduationCap className="w-7 h-7" />
+            Join Assessment
+          </Link>
+
           {isAdminLoggedIn && (
             <Link 
-              href="/admin/dashboard" 
+              href={localStorage.getItem('userRole') === 'superadmin' ? "/admin/super" : "/admin/dashboard"}
               className={`flex items-center gap-4 p-5 rounded-[2rem] text-xl font-black transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'} duration-500 delay-150 shadow-sm border ${
                 pathname.startsWith('/admin') ? 'bg-slate-900 text-white border-slate-800 shadow-slate-200' : 'bg-slate-50 text-slate-600 border-slate-100'
               }`}
@@ -200,16 +169,9 @@ export default function Navbar() {
           
           {isLoggedIn ? (
             <div className={`flex flex-col gap-4 transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'} duration-500 delay-200`}>
-              <Link 
-                href={isAdminLoggedIn ? "/admin/dashboard" : "/dashboard"}
-                className="flex items-center gap-4 p-5 rounded-[2rem] bg-blue-600 text-white text-xl font-black shadow-2xl shadow-blue-200 border border-blue-500"
-              >
-                <LayoutDashboard className="w-7 h-7" />
-                My Dashboard
-              </Link>
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-4 p-5 rounded-[2rem] bg-rose-50 text-rose-600 text-xl font-black border border-rose-100 shadow-sm"
+                className="flex items-center gap-4 p-5 rounded-[2rem] bg-rose-50 text-rose-600 text-xl font-black border border-rose-100 shadow-sm text-left"
               >
                 <LogOut className="w-7 h-7" />
                 Sign Out
@@ -217,11 +179,11 @@ export default function Navbar() {
             </div>
           ) : (
             <Link 
-              href={pathname.startsWith('/admin') ? "/admin/login" : "/login"} 
+              href="/admin/login"
               className={`flex items-center justify-center gap-4 p-6 rounded-[2.5rem] bg-blue-600 text-white text-2xl font-black shadow-2xl shadow-blue-200 transition-all transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'} duration-500 delay-200 border border-blue-500`}
             >
               <LogIn className="w-8 h-8" />
-              Sign In
+              Instructor Login
             </Link>
           )}
         </div>

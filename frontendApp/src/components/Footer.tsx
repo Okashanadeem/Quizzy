@@ -11,7 +11,7 @@ export default function Footer() {
             <div className="p-1.5 rounded-lg bg-slate-900 text-blue-400">
               <Sparkles className="w-4 h-4 fill-current" />
             </div>
-            <span className="text-sm font-black text-slate-900 tracking-tighter uppercase">Quizzy</span>
+            <span className="text-sm font-black text-slate-900 tracking-tighter uppercase">EazyQuizzy</span>
           </div>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
             Next-Gen Assessment Platform

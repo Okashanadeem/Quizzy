@@ -19,7 +19,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col">
         <Toaster position="top-center" reverseOrder={false} />
         <Navbar />
-        <main className="flex-grow flex flex-col">{children}</main>
+        <main className="flex-grow flex flex-col mt-[75px]">{children}</main>
         <Footer />
       </body>
     </html>

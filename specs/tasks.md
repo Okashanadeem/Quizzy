@@ -1,4 +1,4 @@
-# Master Task List: Online Quiz Web App
+# Master Task List: EazyQuizzy
 
 This is the central task tracking list for the whole project.
 
@@ -96,3 +96,27 @@ This is the central task tracking list for the whole project.
 - [x] T069: Implement "Window Blur" detection and violation tracking (Focus Monitoring).
 - [x] T070: Implement server-side Pagination for admin tables (Quizzes/Submissions).
 - [x] T071: Configure Nodemailer with SMTP provider for production email delivery.
+
+## **Phase 13: Multi-Level Auth (Super Admin/Teacher)**
+- [x] T072: Implement `Teacher` model and Super Admin env-based auth.
+- [x] T073: Create Super Admin Dashboard (Teacher CRUD).
+- [x] T074: Implement random password generation and email delivery for Teachers.
+- [x] T075: Implement global quiz visibility (metadata only) for Super Admin.
+
+## **Phase 14: Teacher Dashboard & Quiz Logic**
+- [x] T076: Implement Teacher-specific login and personal dashboard.
+- [x] T077: Update `Quiz` model with `teacherId` and unique `accessCode`.
+- [x] T078: Implement unique alphanumeric `accessCode` generation logic.
+- [x] T079: Add "Copy Invite" button with formatted template on Teacher Dashboard.
+
+## **Phase 15: Unified Student Join Flow & Shuffling**
+- [x] T080: Remove `students.json` and legacy student/guest login flows.
+- [x] T081: Create the unified `/join` page with code validation.
+- [x] T082: Implement Fisher-Yates MCQ shuffling for student attempts.
+- [x] T083: Implement "Send results to student email" toggle and logic.
+
+## **Phase 16: EazyQuizzy Branding & Refactoring**
+- [x] T084: Global rename "Quizzy" -> "EazyQuizzy" (Codebase-wide).
+- [x] T085: Update logos, favicons, and metadata for EazyQuizzy branding.
+- [x] T086: Implement RBAC middleware and enforce `teacherId` data isolation.
+- [x] T087: Perform final system cleanup and documentation update.

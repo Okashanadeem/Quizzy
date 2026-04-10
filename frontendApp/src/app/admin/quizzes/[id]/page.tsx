@@ -360,7 +360,7 @@ export default function ManageQuestions({ params }: { params: Promise<{ id: stri
                           )}
                           <div className="flex justify-between items-center pt-2">
                             <p className="text-sm font-bold text-slate-700">
-                              Correct Answer: <span className="text-emerald-600 ml-1">{q.answer || 'N/A'}</span>
+                              Correct Answer: <span className={q.answer ? "text-emerald-600 ml-1" : "text-amber-600 ml-1 italic"}>{q.answer || (q.type === 'short' ? 'Manual Grading Required' : 'N/A')}</span>
                             </p>
                             <button 
                               onClick={(e) => {
